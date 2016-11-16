@@ -35,6 +35,7 @@ module Plot
         , area
         , areaStyle
         , line
+        , lineAnimated
         , lineStyle
         , Element
         , MetaAttr
@@ -53,7 +54,7 @@ module Plot
  It is insprired by the elm-html api, using the `element attrs children` pattern.
 
 # Elements
-@docs Element, plot, line, area, xAxis, yAxis, Point, Style
+@docs Element, plot, line, lineAnimated, area, xAxis, yAxis, Point, Style
 
 # Configuration
 
@@ -893,12 +894,14 @@ area attrs points =
 type alias LineConfig =
     { style : Style
     , points : List Point
+    , previous : Maybe (List Point)
     }
 
 
 defaultLineConfig =
     { style = []
     , points = []
+    , previous = Nothing
     }
 
 
@@ -934,8 +937,17 @@ line attrs points =
         config =
             List.foldr (<|) defaultLineConfig attrs
     in
-        Line { config | points = points }
+        Line { config | points = points, previous = Nothing }
 
+
+{-| -}
+lineAnimated : List LineAttr -> List Point -> Maybe (List Point) -> Element msg
+lineAnimated attrs points previous =
+    let
+        config =
+            List.foldr (<|) defaultLineConfig attrs
+    in
+        Line { config | points = points, previous = previous }
 
 
 -- PARSE PLOT
@@ -1240,23 +1252,54 @@ viewArea { toSvgCoords } { points, style } =
 
 
 viewLine : PlotProps -> LineConfig -> Svg.Svg a
-viewLine { toSvgCoords } { points, style } =
+viewLine { toSvgCoords } { points, previous, style } =
     let
         svgPoints =
             List.map toSvgCoords points
 
+        (path, animation) =
+            case previous of
+                Nothing ->
+                    (svgPoints, [])
+
+                Just previous ->
+                    if List.isEmpty previous then (svgPoints, [])
+                    else (previous, [ viewAnimation (List.map toSvgCoords previous) svgPoints ])
+    in
+        Svg.path
+            [ Svg.Attributes.d (toLinePath path)
+            , Svg.Attributes.style (toStyle style)
+            ]
+            animation
+
+
+viewAnimation from to =
+    Svg.animate
+        [ Svg.Attributes.id (List.foldr (\(x, y) r -> r ++ toString x ++ toString y) "" from)
+        , Svg.Attributes.attributeName "d"
+        , Svg.Attributes.attributeType "XML"
+        , Svg.Attributes.from (toLinePath from)
+        , Svg.Attributes.to (toLinePath to)
+        , Svg.Attributes.dur "1s"
+        , Svg.Attributes.fill "freeze"
+        , Svg.Attributes.repeatCount "indefinite"
+        , Svg.Attributes.calcMode "spline"
+        , Svg.Attributes.keyTimes "0 ; 1"
+        , Svg.Attributes.keySplines "0 .25 .75 1"
+        ]
+        []
+
+
+toLinePath : List Point -> String
+toLinePath svgPoints =
+    let
         ( startInstruction, tail ) =
             startPath svgPoints
 
         instructions =
             coordToInstruction "L" svgPoints
-    in
-        Svg.path
-            [ Svg.Attributes.d (startInstruction ++ instructions)
-            , Svg.Attributes.style (toStyle style)
-            ]
-            []
-
+    in 
+        startInstruction ++ instructions
 
 
 -- CALCULATE SCALES
@@ -1473,3 +1516,8 @@ collectPoints element allPoints =
 
         Y ->
             y
+
+
+testPath : String
+testPath =
+    "M 0 416.667 L 0 416.667 L 100 444.444 L 200 277.778 L 250 83.3333 L 300 0 L 400 27.7778 L 500 55.5556 L 550 83.3333 L 650 111.111 L 750 138.889 L 800 166.667"

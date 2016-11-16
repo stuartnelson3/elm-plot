@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Svg
 import Svg.Attributes
 import Random
-import Time exposing (Time, minute)
+import Time exposing (Time, second)
 
 import Plot exposing (..)
 import AreaChart exposing (..)
@@ -23,6 +23,7 @@ import ComposedChart exposing (..)
 type alias Model =
     { openSnippet : Maybe String
     , data : List (Float, Float)
+    , previousData : Maybe (List ( Float, Float ))
     }
 
 
@@ -35,6 +36,7 @@ initModel : Model
 initModel =
     { openSnippet = Nothing
     , data = []
+    , previousData = Nothing
     }
 
 
@@ -58,7 +60,11 @@ update msg model =
             ( model, fetchNewData )
 
         NewData data ->
-            ( { model | data = List.indexedMap (\i v -> (toFloat i, v)) data }, Cmd.none )
+            ( { model
+            | previousData = Just model.data
+            , data = List.indexedMap (\i v -> (toFloat i, v)) data
+            }
+            , Cmd.none )
 
 
 fetchNewData : Cmd Msg
@@ -158,17 +164,17 @@ view model =
                 [ text "Github" ]
             ]
         , viewTitle model "Simple Area Chart" "AreaChart" AreaChart.code
-        , AreaChart.chart model.data
+        --, AreaChart.chart
         , viewTitle model "Multi Area Chart" "MultiAreaChart" MultiAreaChart.code
-        , MultiAreaChart.chart
+        --, MultiAreaChart.chart
         , viewTitle model "Line Chart" "MultiLineChart" MultiLineChart.code
-        , MultiLineChart.chart
+        , MultiLineChart.chart model.data model.previousData
         , viewTitle model "Grid" "GridChart" GridChart.code
-        , GridChart.chart
+        --, GridChart.chart
         , viewTitle model "Custom ticks and labels" "CustomTickChart" CustomTickChart.code
-        , CustomTickChart.chart
+        --, CustomTickChart.chart
         , viewTitle model "Composable" "ComposedChart" ComposedChart.code
-        , ComposedChart.chart
+        --, ComposedChart.chart
         , div
             [ style [ ( "margin", "100px auto 30px" ), ( "font-size", "14px" ) ] ]
             [ text "Made by "
@@ -187,7 +193,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Time.every minute Tick
+  Time.every second Tick
 
 
 main =

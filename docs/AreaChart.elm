@@ -11,11 +11,11 @@ data1 =
     [ ( 0, 8 ), ( 1, 13 ), ( 2, 14 ), ( 3, 12 ), ( 4, 11 ), ( 5, 16 ), ( 6, 22 ), ( 7, 32 ) ]
 
 
-chart : List ( Float, Float ) -> Svg.Svg a
-chart data =
+chart : Svg.Svg a
+chart =
     plot
         [ size ( 600, 250 ) ]
-        [ area [ areaStyle [ ( "stroke", Colors.blueStroke ), ( "fill", Colors.blueFill ) ] ] data
+        [ area [ areaStyle [ ( "stroke", Colors.blueStroke ), ( "fill", Colors.blueFill ) ] ] data1
         , xAxis [ axisStyle [ ( "stroke", Colors.axisColor ) ] ]
         ]
 
