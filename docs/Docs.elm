@@ -5,6 +5,9 @@ import Html.Attributes exposing (style, src, href, class)
 import Html.Events exposing (onClick)
 import Svg
 import Svg.Attributes
+import Random
+import Time exposing (Time, minute)
+
 import Plot exposing (..)
 import AreaChart exposing (..)
 import MultiAreaChart exposing (..)
@@ -18,7 +21,21 @@ import ComposedChart exposing (..)
 
 
 type alias Model =
-    Maybe String
+    { openSnippet : Maybe String
+    , data : List (Float, Float)
+    }
+
+
+init : ( Model, Cmd Msg )
+init =
+    (!) initModel [ fetchNewData, highlight "none" ]
+
+
+initModel : Model
+initModel =
+    { openSnippet = Nothing
+    , data = []
+    }
 
 
 
@@ -27,24 +44,36 @@ type alias Model =
 
 type Msg
     = Toggle (Maybe String)
+    | NewData (List Float)
+    | Tick Time
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Toggle id ->
-            ( id, Cmd.none )
+        Toggle sectionId ->
+            ( { model | openSnippet = sectionId }, Cmd.none )
 
+        Tick _ ->
+            ( model, fetchNewData )
+
+        NewData data ->
+            ( { model | data = List.indexedMap (\i v -> (toFloat i, v)) data }, Cmd.none )
+
+
+fetchNewData : Cmd Msg
+fetchNewData =
+    Random.generate NewData (Random.list 10 (Random.float 0 100))
 
 
 -- VIEW
 
 
 viewTitle : Model -> String -> String -> String -> Html Msg
-viewTitle model title name codeString =
+viewTitle { openSnippet } title name codeString =
     let
         isOpen =
-            case model of
+            case openSnippet of
                 Just id ->
                     id == title
 
@@ -129,7 +158,7 @@ view model =
                 [ text "Github" ]
             ]
         , viewTitle model "Simple Area Chart" "AreaChart" AreaChart.code
-        , AreaChart.chart
+        , AreaChart.chart model.data
         , viewTitle model "Multi Area Chart" "MultiAreaChart" MultiAreaChart.code
         , MultiAreaChart.chart
         , viewTitle model "Line Chart" "MultiLineChart" MultiLineChart.code
@@ -152,11 +181,20 @@ view model =
         ]
 
 
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Time.every minute Tick
+
+
 main =
     Html.program
-        { init = ( Nothing, highlight "none" )
+        { init = init
         , update = update
-        , subscriptions = (always Sub.none)
+        , subscriptions = subscriptions
         , view = view
         }
 
