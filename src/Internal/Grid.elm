@@ -1,7 +1,7 @@
 module Internal.Grid exposing (..)
 
 import Svg
-import Svg.Attributes
+import Plot.Types exposing (..)
 import Internal.Types exposing (..)
 import Internal.Draw as Draw exposing (..)
 import Internal.Line as Line
@@ -58,10 +58,6 @@ viewLines ({ oppositeTicks } as meta) { values, linesConfig } =
     List.map (viewLine linesConfig meta) <| getValues oppositeTicks values
 
 
-viewLine : Line.Config a -> Meta -> Float -> Svg.Svg a
-viewLine { style, customAttrs } =
-    [ Svg.Attributes.style (toStyle style)
-    , Svg.Attributes.class "elm-plot__grid__line"
-    ]
-        ++ customAttrs
-        |> Draw.fullLine
+viewLine : Line.Config a -> Meta -> Value -> Svg.Svg a
+viewLine config meta position =
+    Line.view meta config [ ( meta.scale.x.lowest, position ), ( meta.scale.x.highest, position ) ]

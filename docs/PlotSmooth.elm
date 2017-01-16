@@ -2,8 +2,7 @@ module PlotSmooth exposing (plotExample)
 
 import Svg
 import Plot exposing (..)
-import Plot.Line as Line
-import Plot.Area as Area
+import Plot.Attributes as Attributes
 import Plot.Axis as Axis
 import Common exposing (..)
 
@@ -41,14 +40,14 @@ view =
         , domainLowest (\y -> y - 1)
         ]
         [ area
-            [ Area.stroke pinkStroke
-            , Area.fill pinkFill
-            , Area.strokeWidth 1
-            , Area.smoothingBezier
+            [ Attributes.stroke pinkStroke
+            , Attributes.fill pinkFill
+            , Attributes.strokeWidth 1
+            , Attributes.smoothingBezier
             ]
             data1
         , xAxis
-            [ Axis.line [ Line.stroke axisColor ]
+            [ Axis.line [ Attributes.stroke axisColor ]
             , Axis.tickDelta 1
             ]
         ]

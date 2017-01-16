@@ -108,13 +108,8 @@ view ({ scale, toSvgCoords, oppositeAxisCrossings } as meta) ({ lineConfig, tick
 
 
 viewAxisLine : Line.Config msg -> Meta -> Float -> Svg.Svg msg
-viewAxisLine { style, customAttrs } =
-    Draw.fullLine
-        ([ Svg.Attributes.style (toStyle style)
-         , Svg.Attributes.class "elm-plot__axis__line"
-         ]
-            ++ customAttrs
-        )
+viewAxisLine config meta position =
+    Line.view meta config [ ( meta.scale.x.lowest, position ), ( meta.scale.x.highest, position ) ]
 
 
 

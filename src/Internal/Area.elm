@@ -9,7 +9,10 @@ import Internal.Draw exposing (PathType(..), toPath, toLinePath, toStyle, toClip
 
 
 type alias Config a =
-    { style : Style
+    { stroke : String
+    , strokeWidth : Int
+    , fill : String
+    , opacity : Float
     , smoothing : Smoothing
     , customAttrs : List (Svg.Attribute a)
     }
@@ -17,14 +20,17 @@ type alias Config a =
 
 defaultConfig : Config a
 defaultConfig =
-    { style = []
+    { stroke = "black"
+    , strokeWidth = 1
+    , fill = "grey"
+    , opacity = 1
     , smoothing = None
     , customAttrs = []
     }
 
 
 view : Meta -> Config a -> List Point -> Svg.Svg a
-view meta { style, smoothing, customAttrs } points =
+view meta config points =
     let
         ( lowestX, highestX ) =
             getEdgesX points
@@ -35,21 +41,21 @@ view meta { style, smoothing, customAttrs } points =
         instructions =
             List.concat
                 [ [ M ( lowestX, lowestY ) ]
-                , (toLinePath smoothing points)
-                , [ L ( highestX, lowestY ) ]
+                , (toLinePath config.smoothing points)
+                , [ L ( highestX, lowestY ), Z ]
                 ]
                 |> toPath meta
-
-        attrs =
-            (stdAttributes meta instructions style) ++ customAttrs
     in
-        Svg.path attrs []
-
-
-stdAttributes : Meta -> String -> Style -> List (Svg.Attribute a)
-stdAttributes meta d style =
-    [ Svg.Attributes.d (d ++ "Z")
-    , Svg.Attributes.style (toStyle style)
-    , Svg.Attributes.class "elm-plot__serie--area"
-    , Svg.Attributes.clipPath ("url(#" ++ toClipPathId meta ++ ")")
-    ]
+        Svg.path
+            (List.append
+                [ Svg.Attributes.d instructions
+                , Svg.Attributes.opacity (toString config.opacity)
+                , Svg.Attributes.fill config.fill
+                , Svg.Attributes.stroke config.stroke
+                , Svg.Attributes.strokeWidth (toString config.strokeWidth ++ "px")
+                , Svg.Attributes.class "elm-plot__serie--area"
+                , Svg.Attributes.clipPath ("url(#" ++ toClipPathId meta ++ ")")
+                ]
+                config.customAttrs
+            )
+            []

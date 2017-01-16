@@ -2,10 +2,9 @@ module PlotGrid exposing (plotExample)
 
 import Svg
 import Plot exposing (..)
-import Plot.Line as Line
+import Plot.Attributes as Attributes
 import Plot.Axis as Axis
 import Plot.Grid as Grid
-import Plot.Line as Line
 import Common exposing (..)
 
 
@@ -41,20 +40,20 @@ view =
         ]
         [ verticalGrid
             [ Grid.lines
-                [ Line.stroke axisColorLight ]
+                [ Attributes.stroke axisColorLight ]
             ]
         , horizontalGrid
             [ Grid.lines
-                [ Line.stroke axisColorLight ]
+                [ Attributes.stroke axisColorLight ]
             , Grid.values [ 4, 8, 12 ]
             ]
         , xAxis
-            [ Axis.line [ Line.stroke axisColor ]
+            [ Axis.line [ Attributes.stroke axisColor ]
             , Axis.tickDelta 0.5
             ]
         , line
-            [ Line.stroke pinkStroke
-            , Line.strokeWidth 3
+            [ Attributes.stroke pinkStroke
+            , Attributes.strokeWidth 3
             ]
             data
         ]
@@ -71,20 +70,20 @@ code =
             ]
             [ verticalGrid
                 [ Grid.lines
-                    [ Line.stroke axisColorLight ]
+                    [ Attributes.stroke axisColorLight ]
                 ]
             , horizontalGrid
                 [ Grid.lines
-                    [ Line.stroke axisColorLight ]
+                    [ Attributes.stroke axisColorLight ]
                 , Grid.values [ 4, 8, 12 ]
                 ]
             , xAxis
-                [ Axis.line [ Line.stroke axisColor ]
+                [ Axis.line [ Attributes.stroke axisColor ]
                 , Axis.tickDelta 0.5
                 ]
             , line
-                [ Line.stroke blueStroke
-                , Line.strokeWidth 2
+                [ Attributes.stroke blueStroke
+                , Attributes.strokeWidth 2
                 ]
                 data
             ]

@@ -8,7 +8,9 @@ import Internal.Draw exposing (..)
 
 
 type alias Config a =
-    { style : Style
+    { stroke : String
+    , strokeWidth : Int
+    , opacity : Float
     , smoothing : Smoothing
     , customAttrs : List (Svg.Attribute a)
     }
@@ -16,33 +18,36 @@ type alias Config a =
 
 defaultConfig : Config a
 defaultConfig =
-    { style = [ ( "fill", "transparent" ), ( "stroke", "black" ) ]
+    { stroke = "black"
+    , strokeWidth = 1
+    , opacity = 1
     , smoothing = None
     , customAttrs = []
     }
 
 
 view : Meta -> Config a -> List Point -> Svg.Svg a
-view meta { style, smoothing, customAttrs } points =
+view meta config points =
     let
         instructions =
             case points of
                 p1 :: rest ->
-                    M p1 :: (toLinePath smoothing (p1 :: rest)) |> toPath meta
+                    M p1 :: (toLinePath config.smoothing (p1 :: rest)) |> toPath meta
 
                 _ ->
                     ""
-
-        attrs =
-            (stdAttributes meta instructions style) ++ customAttrs
     in
-        Svg.path attrs []
-
-
-stdAttributes : Meta -> String -> Style -> List (Svg.Attribute a)
-stdAttributes meta d style =
-    [ Svg.Attributes.d d
-    , Svg.Attributes.style (toStyle style)
-    , Svg.Attributes.class "elm-plot__serie--line"
-    , Svg.Attributes.clipPath ("url(#" ++ toClipPathId meta ++ ")")
-    ]
+        Svg.path
+            (List.append
+                [ Svg.Attributes.d instructions
+                , Svg.Attributes.opacity (toString config.opacity)
+                , Svg.Attributes.fillOpacity "0"
+                , Svg.Attributes.stroke config.stroke
+                , Svg.Attributes.strokeWidth (toString config.strokeWidth ++ "px")
+                , Svg.Attributes.fill "tranparent"
+                , Svg.Attributes.class "elm-plot__serie--line"
+                , Svg.Attributes.clipPath ("url(#" ++ toClipPathId meta ++ ")")
+                ]
+                config.customAttrs
+            )
+            []

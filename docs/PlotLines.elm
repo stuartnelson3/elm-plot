@@ -1,8 +1,8 @@
-module PlotLines exposing (plotExample)
+module PlotStyles exposing (plotExample)
 
 import Svg
 import Plot exposing (..)
-import Plot.Line as Line
+import Plot.Attributes as Attributes
 import Plot.Axis as Axis
 import Common exposing (..)
 
@@ -44,18 +44,18 @@ view =
         , domainLowest (min 0)
         ]
         [ line
-            [ Line.stroke blueStroke
-            , Line.strokeWidth 2
+            [ Attributes.stroke blueStroke
+            , Attributes.strokeWidth 2
             ]
             data1
         , line
-            [ Line.stroke pinkStroke
-            , Line.strokeWidth 2
+            [ Attributes.stroke pinkStroke
+            , Attributes.strokeWidth 2
             ]
             data2
         , xAxis
             [ Axis.line
-                [ Line.stroke axisColor ]
+                [ Attributes.stroke axisColor ]
             , Axis.tickDelta 1
             ]
         ]
@@ -72,18 +72,18 @@ code =
             , domainLowest (min 0)
             ]
             [ line
-                [ Line.stroke blueStroke
-                , Line.strokeWidth 2
+                [ Style.stroke blueStroke
+                , Style.strokeWidth 2
                 ]
                 data1
             , line
-                [ Line.stroke pinkStroke
-                , Line.strokeWidth 2
+                [ Style.stroke pinkStroke
+                , Style.strokeWidth 2
                 ]
                 data2
             , xAxis
                 [ Axis.line
-                    [ Line.stroke axisColor ]
+                    [ Style.stroke axisColor ]
                 , Axis.tickDelta 1
                 ]
             ]

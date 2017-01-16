@@ -2,7 +2,7 @@ module PlotSticky exposing (plotExample)
 
 import Svg
 import Plot exposing (..)
-import Plot.Line as Line
+import Plot.Attributes as Attributes
 import Plot.Axis as Axis
 import Plot.Tick as Tick
 import Plot.Label as Label
@@ -62,15 +62,15 @@ view =
         , domainLowest (always -21)
         ]
         [ line
-            [ Line.stroke pinkStroke
-            , Line.strokeWidth 2
+            [ Attributes.stroke pinkStroke
+            , Attributes.strokeWidth 2
             ]
             data
         , xAxis
             [ Axis.tick
                 [ Tick.view toTickAttrs ]
             , Axis.tickValues [ 3, 6 ]
-            , Axis.line [ Line.stroke Common.axisColor ]
+            , Axis.line [ Attributes.stroke Common.axisColor ]
             , Axis.label
                 [ Label.format (\{ value } -> toString value ++ " ms") ]
             , Axis.cleanCrossings
@@ -79,7 +79,7 @@ view =
             [ Axis.positionHighest
             , Axis.cleanCrossings
             , Axis.tick [ Tick.view toTickAttrs ]
-            , Axis.line [ Line.stroke Common.axisColor ]
+            , Axis.line [ Attributes.stroke Common.axisColor ]
             , Axis.label
                 [ Label.viewDynamic toLabelAttrsY
                 , Label.format
@@ -95,7 +95,7 @@ view =
             [ Axis.positionLowest
             , Axis.cleanCrossings
             , Axis.anchorInside
-            , Axis.line [ Line.stroke Common.axisColor ]
+            , Axis.line [ Attributes.stroke Common.axisColor ]
             , Axis.label
                 [ Label.format
                     (\{ index, value } ->
@@ -141,22 +141,22 @@ code =
             , domainLowest (always -21)
             ]
             [ line
-                [ Line.stroke pinkStroke
-                , Line.strokeWidth 2
+                [ Style.stroke pinkStroke
+                , Style.strokeWidth 2
                 ]
                 data
             , xAxis
                 [ Axis.tick
                     [ Tick.view toTickAttrs ]
                 , Axis.tickValues [ 3, 6 ]
-                , Axis.line [ Line.stroke axisColor ]
+                , Axis.line [ Style.stroke axisColor ]
                 , Axis.label
                     [ Label.format (\\{ value } -> toString value ++ " ms") ]
                 , Axis.cleanCrossings
                 ]
             , yAxis
                 [ Axis.positionHighest
-                , Axis.line [ Line.stroke axisColor ]
+                , Axis.line [ Style.stroke axisColor ]
                 , Axis.cleanCrossings
                 , Axis.tick [ Tick.view toTickAttrs ]
                 , Axis.label
@@ -173,7 +173,7 @@ code =
             , yAxis
                 [ Axis.positionLowest
                 , Axis.cleanCrossings
-                , Axis.line [ Line.stroke axisColor ]
+                , Axis.line [ Style.stroke axisColor ]
                 , Axis.anchorInside
                 , Axis.label
                     [ Label.format

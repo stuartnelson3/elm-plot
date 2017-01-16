@@ -2,8 +2,7 @@ module PlotComposed exposing (view, code, id)
 
 import Svg
 import Plot exposing (..)
-import Plot.Area as Area
-import Plot.Line as Line
+import Plot.Attributes as Attributes
 import Plot.Grid as Grid
 import Plot.Axis as Axis
 import Plot.Tick as Tick
@@ -64,26 +63,26 @@ view state =
         , margin ( 15, 20, 40, 15 )
         ]
         [ horizontalGrid
-            [ Grid.lines [ Line.stroke "#f2f2f2" ] ]
+            [ Grid.lines [ Attributes.stroke "#f2f2f2" ] ]
         , verticalGrid
-            [ Grid.lines [ Line.stroke "#f2f2f2" ] ]
+            [ Grid.lines [ Attributes.stroke "#f2f2f2" ] ]
         , area
-            [ Area.stroke skinStroke
-            , Area.fill skinFill
-            , Area.opacity 0.5
-            , Area.smoothingBezier
+            [ Attributes.stroke skinStroke
+            , Attributes.fill skinFill
+            , Attributes.opacity 0.5
+            , Attributes.smoothingBezier
             ]
             (List.map (\( x, y ) -> ( x, toFloat <| round (y * 2.1) )) data1)
         , area
-            [ Area.stroke blueStroke
-            , Area.fill blueFill
-            , Area.smoothingBezier
+            [ Attributes.stroke blueStroke
+            , Attributes.fill blueFill
+            , Attributes.smoothingBezier
             ]
             data1
         , line
-            [ Line.stroke pinkStroke
-            , Line.smoothingBezier
-            , Line.strokeWidth 2
+            [ Attributes.stroke pinkStroke
+            , Attributes.smoothingBezier
+            , Attributes.strokeWidth 2
             ]
             (List.map (\( x, y ) -> ( x, toFloat <| round y * 3 )) data1)
         , scatter
@@ -94,7 +93,7 @@ view state =
             , Axis.cleanCrossings
             , Axis.positionLowest
             , Axis.line
-                [ Line.stroke "#b9b9b9" ]
+                [ Attributes.stroke "#b9b9b9" ]
             , Axis.tickDelta 50
             , Axis.label
                 [ Label.view labelStyle
@@ -104,7 +103,7 @@ view state =
         , xAxis
             [ Axis.cleanCrossings
             , Axis.line
-                [ Line.stroke "#b9b9b9" ]
+                [ Attributes.stroke "#b9b9b9" ]
             , Axis.tickDelta 2.5
             , Axis.tick
                 [ Tick.viewDynamic toTickStyle ]
@@ -118,7 +117,7 @@ view state =
             ]
         , xAxis
             [ Axis.positionLowest
-            , Axis.line [ Line.stroke "#b9b9b9" ]
+            , Axis.line [ Attributes.stroke "#b9b9b9" ]
             , Axis.tick
                 [ Tick.viewDynamic toTickStyle ]
             , Axis.label
@@ -181,23 +180,23 @@ code =
             , margin ( 15, 20, 40, 15 )
             ]
             [ horizontalGrid
-                [ Grid.lines [ Line.stroke "#f2f2f2" ] ]
+                [ Grid.lines [ Attributes.stroke "#f2f2f2" ] ]
             , verticalGrid
-                [ Grid.lines [ Line.stroke "#f2f2f2" ] ]
+                [ Grid.lines [ Attributes.stroke "#f2f2f2" ] ]
             , area
-                [ Area.stroke skinStroke
-                , Area.fill skinFill
-                , Area.opacity 0.5
+                [ Attributes.stroke skinStroke
+                , Attributes.fill skinFill
+                , Attributes.opacity 0.5
                 ]
                 data1
             , area
-                [ Area.stroke blueStroke
-                , Area.fill blueFill
+                [ Attributes.stroke blueStroke
+                , Attributes.fill blueFill
                 ]
                 data1
             , line
-                [ Line.stroke pinkStroke
-                , Line.strokeWidth 2
+                [ Attributes.stroke pinkStroke
+                , Attributes.strokeWidth 2
                 ]
                 data2
             , scatter
@@ -208,7 +207,7 @@ code =
                 , Axis.cleanCrossings
                 , Axis.positionLowest
                 , Axis.line
-                    [ Line.stroke "#b9b9b9" ]
+                    [ Attributes.stroke "#b9b9b9" ]
                 , Axis.tickDelta 50
                 , Axis.label
                     [ Label.view labelStyle
@@ -218,7 +217,7 @@ code =
             , xAxis
                 [ Axis.cleanCrossings
                 , Axis.line
-                    [ Line.stroke "#b9b9b9" ]
+                    [ Attributes.stroke "#b9b9b9" ]
                 , Axis.tickDelta 2.5
                 , Axis.tick
                     [ Tick.viewDynamic toTickStyle ]
@@ -232,7 +231,7 @@ code =
                 ]
             , xAxis
                 [ Axis.positionLowest
-                , Axis.line [ Line.stroke "#b9b9b9" ]
+                , Axis.line [ Attributes.stroke "#b9b9b9" ]
                 , Axis.tick
                     [ Tick.viewDynamic toTickStyle ]
                 , Axis.label

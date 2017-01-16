@@ -4,7 +4,7 @@ import Svg
 import Plot exposing (..)
 import Plot.Scatter as Scatter
 import Plot.Axis as Axis
-import Plot.Line as Line
+import Plot.Attributes as Attributes
 import Common exposing (..)
 
 
@@ -47,7 +47,7 @@ view =
             data
         , xAxis
             [ Axis.line
-                [ Line.stroke axisColor ]
+                [ Attributes.stroke axisColor ]
             , Axis.tickDelta 2
             ]
         ]
@@ -71,7 +71,7 @@ code =
                 data
             , xAxis
                 [ Axis.line
-                    [ Line.stroke axisColor ]
+                    [ Style.stroke axisColor ]
                 , Axis.tickDelta 2
                 ]
             ]

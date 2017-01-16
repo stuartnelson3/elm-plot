@@ -4,7 +4,7 @@ import Svg
 import Plot exposing (..)
 import Plot.Bars as Bars
 import Plot.Axis as Axis
-import Plot.Line as Line
+import Plot.Attributes as Attributes
 import Plot.Label as Label
 import Common exposing (..)
 
@@ -66,7 +66,7 @@ view =
                 ]
             )
         , xAxis
-            [ Axis.line [ Line.stroke Common.axisColor ]
+            [ Axis.line [ Attributes.stroke Common.axisColor ]
             , Axis.tickDelta 1
             ]
         ]
@@ -108,7 +108,7 @@ code =
                     ]
                 )
             , xAxis
-                [ Axis.line [ Line.stroke Common.axisColor ]
+                [ Axis.line [ Attributes.stroke Common.axisColor ]
                 , Axis.tickDelta 1
                 ]
             ]

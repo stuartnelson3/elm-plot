@@ -2,7 +2,7 @@ module PlotTicks exposing (plotExample)
 
 import Svg
 import Plot exposing (..)
-import Plot.Line as Line
+import Plot.Attributes as Attributes
 import Plot.Axis as Axis
 import Plot.Tick as Tick
 import Plot.Label as Label
@@ -66,12 +66,12 @@ view =
         , margin ( 10, 20, 40, 20 )
         ]
         [ line
-            [ Line.stroke pinkStroke
-            , Line.strokeWidth 2
+            [ Attributes.stroke pinkStroke
+            , Attributes.strokeWidth 2
             ]
             data
         , xAxis
-            [ Axis.line [ Line.stroke axisColor ]
+            [ Axis.line [ Attributes.stroke axisColor ]
             , Axis.tick [ Tick.viewDynamic toTickStyle ]
             , Axis.label
                 [ Label.format
@@ -123,12 +123,12 @@ code =
             , margin ( 10, 20, 40, 20 )
             ]
             [ line
-                [ Line.stroke pinkStroke
-                , Line.strokeWidth 2
+                [ Style.stroke pinkStroke
+                , Style.strokeWidth 2
                 ]
                 data
             , xAxis
-                [ Axis.line [ Line.stroke axisColor ]
+                [ Axis.line [ Style.stroke axisColor ]
                 , Axis.tick [ Tick.viewDynamic toTickStyle ]
                 , Axis.label
                     [ Label.format
