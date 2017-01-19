@@ -3,8 +3,6 @@ module PlotGrid exposing (plotExample)
 import Svg
 import Plot exposing (..)
 import Plot.Attributes as Attributes exposing (..)
-import Plot.Axis as Axis
-import Plot.Grid as Grid
 import Common exposing (..)
 
 

@@ -35,14 +35,14 @@ isOdd n =
     rem n 2 > 0
 
 
-tickStyles : List (StyleAttribute (TickStyle msg))
+tickStyles : List (Attribute (TickStyle msg))
 tickStyles =
     [ length 7
     , stroke "#e4e3e3"
     ]
 
 
-toLabelAttrsY : AxisLabelInfo -> List (StyleAttribute (LabelStyle msg))
+toLabelAttrsY : AxisLabelInfo -> List (Attribute (LabelStyle msg))
 toLabelAttrsY { index, value } =
     if not <| isOdd index then
         []
@@ -120,14 +120,14 @@ code =
         rem n 2 > 0
 
 
-    tickStyles : List (StyleAttribute msg)
+    tickStyles : List (Attribute msg)
     tickStyles =
         [ length 7
         , stroke "#e4e3e3"
         ]
 
 
-    toLabelAttrsY : LabelInfo -> List (StyleAttribute msg)
+    toLabelAttrsY : LabelInfo -> List (Attribute msg)
     toLabelAttrsY { index, value } =
         if not <| isOdd index then
             []

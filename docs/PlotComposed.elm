@@ -32,7 +32,7 @@ filterLabels { index } =
     not (isOdd index)
 
 
-toTickStyle : AxisLabelInfo -> List (StyleAttribute (TickStyle msg))
+toTickStyle : AxisLabelInfo -> List (Attribute (TickStyle msg))
 toTickStyle { index } =
     if isOdd index then
         [ length 7
@@ -44,7 +44,7 @@ toTickStyle { index } =
         ]
 
 
-labelStyle : List (StyleAttribute (LabelStyle msg))
+labelStyle : List (Attribute (LabelStyle msg))
 labelStyle =
     [ fontSize 12
     , displace ( 0, -2 )
@@ -152,7 +152,7 @@ code =
         not (isOdd index)
 
 
-    toTickStyle : Axis.LabelInfo -> List (StyleAttribute msg)
+    toTickStyle : Axis.LabelInfo -> List (Attribute msg)
     toTickStyle { index } =
         if isOdd index then
             [ length 7
@@ -164,7 +164,7 @@ code =
             ]
 
 
-    labelStyle : List (StyleAttribute msg)
+    labelStyle : List (Attribute msg)
     labelStyle =
         [ fontSize 12
         , displace ( 0, -2 )

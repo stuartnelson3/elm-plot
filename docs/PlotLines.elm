@@ -3,7 +3,6 @@ module PlotStyles exposing (plotExample)
 import Svg
 import Plot exposing (..)
 import Plot.Attributes as Attributes
-import Plot.Axis as Axis
 import Common exposing (..)
 
 

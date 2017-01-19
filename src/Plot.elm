@@ -1,7 +1,6 @@
 module Plot
     exposing
-        ( Attribute
-        , plot
+        ( plot
         , plotInteractive
         , xAxis
         , yAxis
@@ -42,7 +41,7 @@ module Plot
  This means that the types are basically interchangable and you can use the same methods on them.
 
 # Definitions
-@docs Attribute, Element
+@docs  Element
 
 # Elements
 @docs plot, plotInteractive, xAxis, yAxis, hint, verticalGrid, horizontalGrid, custom
@@ -69,12 +68,7 @@ import Svg.Attributes
 import Svg.Lazy
 import Json.Decode as Json
 import DOM
-import Plot.Axis as Axis
-import Plot.Grid as Grid
-import Plot.Area as Area
 import Plot.Bars as Bars
-import Plot.Scatter as Scatter
-import Plot.Line as Line
 import Plot.Hint as Hint
 import Plot.Types exposing (..)
 import Internal.Grid as GridInternal
@@ -104,7 +98,7 @@ type Element msg
     | CustomElement ((Point -> Point) -> Svg.Svg msg)
 
 
-type alias Config =
+type alias Plot =
     { size : Oriented Float
     , padding : ( Float, Float )
     , margin : ( Float, Float, Float, Float )
@@ -116,7 +110,7 @@ type alias Config =
     }
 
 
-defaultConfig : Config
+defaultConfig : Plot
 defaultConfig =
     { size = Oriented 800 500
     , padding = ( 0, 0 )
@@ -129,18 +123,13 @@ defaultConfig =
     }
 
 
-{-| -}
-type alias Attribute =
-    Config -> Config
-
-
 {-| Adds padding to your plot, meaning extra space below
  and above the lowest and highest point in your plot.
  The unit is pixels and the format is `( bottom, top )`.
 
  Default: `( 0, 0 )`
 -}
-padding : ( Int, Int ) -> Attribute
+padding : ( Int, Int ) -> Attribute Plot
 padding ( bottom, top ) config =
     { config | padding = ( toFloat bottom, toFloat top ) }
 
@@ -150,7 +139,7 @@ padding ( bottom, top ) config =
 
  Default: `( 800, 500 )`
 -}
-size : ( Int, Int ) -> Attribute
+size : ( Int, Int ) -> Attribute Plot
 size ( width, height ) config =
     { config | size = Oriented (toFloat width) (toFloat height) }
 
@@ -161,28 +150,28 @@ the format is `( top, right, bottom, left )`.
 
  Default: `( 0, 0, 0, 0 )`
 -}
-margin : ( Int, Int, Int, Int ) -> Attribute
+margin : ( Int, Int, Int, Int ) -> Attribute Plot
 margin ( t, r, b, l ) config =
     { config | margin = ( toFloat t, toFloat r, toFloat b, toFloat l ) }
 
 
 {-| Adds styles to the svg element.
 -}
-style : Style -> Attribute
+style : Style -> Attribute Plot
 style style config =
     { config | style = defaultConfig.style ++ style ++ [ ( "padding", "0" ) ] }
 
 
 {-| Adds classes to the svg element.
 -}
-classes : List String -> Attribute
+classes : List String -> Attribute Plot
 classes classes config =
     { config | classes = classes }
 
 
 {-| Adds an id to the svg element.
 -}
-id : String -> Attribute
+id : String -> Attribute Plot
 id id config =
     { config | id = id }
 
@@ -199,7 +188,7 @@ id id config =
  **Note:** If you are using `padding` as well, the extra padding will still be
  added outside the domain.
 -}
-domainLowest : (Float -> Float) -> Attribute
+domainLowest : (Float -> Float) -> Attribute Plot
 domainLowest toLowest ({ domain } as config) =
     { config | domain = { domain | lower = toLowest } }
 
@@ -214,7 +203,7 @@ domainLowest toLowest ({ domain } as config) =
  **Note:** If you are using `padding` as well, the extra padding will still be
  added outside the domain.
 -}
-domainHighest : (Float -> Float) -> Attribute
+domainHighest : (Float -> Float) -> Attribute Plot
 domainHighest toHighest ({ domain } as config) =
     { config | domain = { domain | upper = toHighest } }
 
@@ -222,7 +211,7 @@ domainHighest toHighest ({ domain } as config) =
 {-| Provide a function to determine the lower boundary of range.
  See `domainLowest` and imagine we're talking about the x-axis.
 -}
-rangeLowest : (Float -> Float) -> Attribute
+rangeLowest : (Float -> Float) -> Attribute Plot
 rangeLowest toLowest ({ range } as config) =
     { config | range = { range | lower = toLowest } }
 
@@ -230,56 +219,56 @@ rangeLowest toLowest ({ range } as config) =
 {-| Provide a function to determine the upper boundary of range.
  See `domainHighest` and imagine we're talking about the x-axis.
 -}
-rangeHighest : (Float -> Float) -> Attribute
+rangeHighest : (Float -> Float) -> Attribute Plot
 rangeHighest toHighest ({ range } as config) =
     { config | range = { range | upper = toHighest } }
 
 
 {-| -}
-xAxis : List (Axis.Attribute msg) -> Element msg
+xAxis : List (Attribute (Axis msg)) -> Element msg
 xAxis attrs =
     Axis (List.foldl (<|) defaultAxisConfig attrs)
 
 
 {-| -}
-yAxis : List (Axis.Attribute msg) -> Element msg
+yAxis : List (Attribute (Axis msg)) -> Element msg
 yAxis attrs =
     Axis (List.foldl (<|) { defaultAxisConfig | orientation = Y } attrs)
 
 
 {-| -}
-horizontalGrid : List (Grid.Attribute msg) -> Element msg
+horizontalGrid : List (Attribute (Grid msg)) -> Element msg
 horizontalGrid attrs =
     Grid (List.foldr (<|) defaultGridConfig attrs)
 
 
 {-| -}
-verticalGrid : List (Grid.Attribute msg) -> Element msg
+verticalGrid : List (Attribute (Grid msg)) -> Element msg
 verticalGrid attrs =
     Grid (List.foldr (<|) { defaultGridConfig | orientation = Y } attrs)
 
 
 {-| -}
-area : List (Area.Attribute msg) -> List Point -> Element msg
+area : List (Attribute (AreaStyle msg)) -> List Point -> Element msg
 area attrs points =
     Area (List.foldr (<|) defaultAreaStyle attrs) points
 
 
 {-| -}
-line : List (Line.Attribute msg) -> List Point -> Element msg
+line : List (Attribute (LineStyle msg)) -> List Point -> Element msg
 line attrs points =
     Line (List.foldr (<|) defaultLineStyle attrs) points
 
 
 {-| -}
-scatter : List (Scatter.Attribute msg) -> List Point -> Element msg
+scatter : List (Attribute (Scatter msg)) -> List Point -> Element msg
 scatter attrs =
     Scatter (List.foldr (<|) defaultScatterConfig attrs)
 
 
 {-| This wraps all your bar series.
 -}
-bars : List (Bars.Attribute msg) -> List (List (Bars.StyleAttribute msg)) -> List Bars.Data -> Element msg
+bars : List (Attribute (Bars msg)) -> List (List (Attribute (BarsStyle msg))) -> List Bars.Data -> Element msg
 bars attrs styleAttrsList groups =
     Bars
         (List.foldr (<|) defaultBarsConfig attrs)
@@ -309,7 +298,7 @@ custom view =
  Pass your attributes and elements to this function and
  a SVG plot will be returned!
 -}
-plot : List Attribute -> List (Element msg) -> Svg msg
+plot : List (Attribute Plot) -> List (Element msg) -> Svg msg
 plot attrs =
     Svg.Lazy.lazy2 parsePlot (toPlotConfig attrs)
 
@@ -318,12 +307,12 @@ plot attrs =
  your message, so you can use the build in interactions (like the hint!) in the plot as well as adding your own.
  See [this example](https://github.com/terezka/elm-plot/blob/master/examples/Interactive.elm).
 -}
-plotInteractive : List Attribute -> List (Element (Interaction msg)) -> Svg (Interaction msg)
+plotInteractive : List (Attribute Plot) -> List (Element (Interaction msg)) -> Svg (Interaction msg)
 plotInteractive attrs =
     Svg.Lazy.lazy2 parsePlotInteractive (toPlotConfig attrs)
 
 
-toPlotConfig : List Attribute -> Config
+toPlotConfig : List (Attribute Plot) -> Plot
 toPlotConfig =
     List.foldl (<|) defaultConfig
 
@@ -447,7 +436,7 @@ getParentPosition =
 -- VIEW
 
 
-parsePlot : Config -> List (Element msg) -> Svg msg
+parsePlot : Plot -> List (Element msg) -> Svg msg
 parsePlot config elements =
     let
         meta =
@@ -456,7 +445,7 @@ parsePlot config elements =
         viewPlot config meta (viewElements meta elements)
 
 
-parsePlotInteractive : Config -> List (Element (Interaction msg)) -> Svg (Interaction msg)
+parsePlotInteractive : Plot -> List (Element (Interaction msg)) -> Svg (Interaction msg)
 parsePlotInteractive config elements =
     let
         meta =
@@ -465,21 +454,21 @@ parsePlotInteractive config elements =
         viewPlotInteractive config meta (viewElements meta elements)
 
 
-viewPlotInteractive : Config -> Meta -> ( List (Svg (Interaction msg)), List (Html (Interaction msg)) ) -> Html (Interaction msg)
+viewPlotInteractive : Plot -> Meta -> ( List (Svg (Interaction msg)), List (Html (Interaction msg)) ) -> Html (Interaction msg)
 viewPlotInteractive config meta ( svgViews, htmlViews ) =
     Html.div
         (plotAttributes config ++ plotAttributesInteraction meta)
         (viewSvg meta config svgViews :: htmlViews)
 
 
-viewPlot : Config -> Meta -> ( List (Svg msg), List (Html msg) ) -> Svg msg
+viewPlot : Plot -> Meta -> ( List (Svg msg), List (Html msg) ) -> Svg msg
 viewPlot config meta ( svgViews, htmlViews ) =
     Html.div
         (plotAttributes config)
         (viewSvg meta config svgViews :: htmlViews)
 
 
-plotAttributes : Config -> List (Html.Attribute msg)
+plotAttributes : Plot -> List (Html.Attribute msg)
 plotAttributes { size, style, id } =
     [ Html.Attributes.class "elm-plot"
     , Html.Attributes.id id
@@ -494,7 +483,7 @@ plotAttributesInteraction meta =
     ]
 
 
-viewSvg : Meta -> Config -> List (Svg msg) -> Svg msg
+viewSvg : Meta -> Plot -> List (Svg msg) -> Svg msg
 viewSvg meta config views =
     Svg.svg
         [ Svg.Attributes.height (toString config.size.y)
@@ -566,7 +555,7 @@ viewElement meta element ( svgViews, htmlViews ) =
 -- CALCULATIONS OF META
 
 
-calculateMeta : Config -> List (Element msg) -> Meta
+calculateMeta : Plot -> List (Element msg) -> Meta
 calculateMeta ({ size, padding, margin, range, domain, id } as config) elements =
     let
         values =

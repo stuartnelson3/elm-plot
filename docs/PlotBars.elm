@@ -3,9 +3,7 @@ module PlotBars exposing (plotExample)
 import Svg
 import Plot exposing (..)
 import Plot.Bars as Bars
-import Plot.Axis as Axis
 import Plot.Attributes as Attributes exposing (..)
-import Plot.Label as Label
 import Common exposing (..)
 
 

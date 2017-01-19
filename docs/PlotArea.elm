@@ -3,9 +3,6 @@ module PlotArea exposing (plotExample)
 import Svg
 import Plot exposing (..)
 import Common exposing (..)
-import Plot.Area as Area
-import Plot.Line as Line
-import Plot.Axis as Axis
 import Plot.Attributes exposing (..)
 
 
@@ -46,7 +43,7 @@ view =
         ]
         [ area
             [ stroke skinStroke
-            , smoothingBezier
+            , interpolation Bezier
             , fill skinFill
             ]
             data1

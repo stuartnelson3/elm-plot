@@ -1,13 +1,13 @@
 module Plot.Attributes
     exposing
-        ( stroke
+        ( Attribute
+        , stroke
         , strokeWidth
         , fill
         , opacity
         , classes
         , displace
         , lineStyle
-        , StyleAttribute
         , InterpolationOption(..)
         , interpolation
         , maxBarWidthPer
@@ -72,53 +72,44 @@ type alias Attribute a =
     a -> a
 
 
-
--- Style alterings
-
-
-{-| -}
-type alias StyleAttribute c =
-    c -> c
-
-
 {-| Set the stroke color.
 -}
-stroke : String -> StyleAttribute { c | stroke : String }
+stroke : String -> Attribute { c | stroke : String }
 stroke stroke config =
     { config | stroke = stroke }
 
 
 {-| Set the stroke width (in pixels).
 -}
-strokeWidth : Int -> StyleAttribute { c | strokeWidth : Int }
+strokeWidth : Int -> Attribute { c | strokeWidth : Int }
 strokeWidth strokeWidth config =
     { config | strokeWidth = strokeWidth }
 
 
 {-| Set the fill color.
 -}
-fill : String -> StyleAttribute { c | fill : String }
+fill : String -> Attribute { c | fill : String }
 fill fill config =
     { config | fill = fill }
 
 
 {-| Set the opacity.
 -}
-opacity : Float -> StyleAttribute { c | opacity : Float }
+opacity : Float -> Attribute { c | opacity : Float }
 opacity opacity config =
     { config | opacity = opacity }
 
 
 {-| Displace an element.
 -}
-displace : ( Int, Int ) -> StyleAttribute { c | displace : ( Int, Int ) }
+displace : ( Int, Int ) -> Attribute { c | displace : ( Int, Int ) }
 displace displace config =
     { config | displace = displace }
 
 
 {-| Set the font size (in pixels).
 -}
-fontSize : Int -> StyleAttribute { c | style : Style }
+fontSize : Int -> Attribute { c | style : Style }
 fontSize fontSize config =
     { config | style = ( "font-size", toString fontSize ++ "px" ) :: config.style }
 
@@ -130,42 +121,42 @@ type InterpolationOption
 
 {-| Smooth line with [Bézier curves] (https://en.wikipedia.org/wiki/B%C3%A9zier_curve).
 -}
-interpolation : InterpolationOption -> StyleAttribute { c | interpolation : InterpolationOption }
+interpolation : InterpolationOption -> Attribute { c | interpolation : InterpolationOption }
 interpolation interpolation config =
     { config | interpolation = interpolation }
 
 
 {-| Add your own attributes. For events, see [this example](https://github.com/terezka/elm-plot/blob/master/examples/Interactive.elm)
 -}
-customAttrs : List (Svg.Attribute msg) -> StyleAttribute { c | customAttrs : List (Svg.Attribute msg) }
+customAttrs : List (Svg.Attribute msg) -> Attribute { c | customAttrs : List (Svg.Attribute msg) }
 customAttrs attrs config =
     { config | customAttrs = attrs }
 
 
 {-| Adds classes.
 -}
-classes : List String -> StyleAttribute { c | classes : List String }
+classes : List String -> Attribute { c | classes : List String }
 classes classes config =
     { config | classes = classes }
 
 
 {-| Adds classes.
 -}
-length : Int -> StyleAttribute { c | length : Int }
+length : Int -> Attribute { c | length : Int }
 length length config =
     { config | length = length }
 
 
 {-| Adds classes.
 -}
-width : Int -> StyleAttribute { c | width : Int }
+width : Int -> Attribute { c | width : Int }
 width width config =
     { config | width = width }
 
 
 {-| Set the radius of your points.
 -}
-radius : Int -> StyleAttribute { c | radius : Int }
+radius : Int -> Attribute { c | radius : Int }
 radius radius config =
     { config | radius = radius }
 
@@ -186,7 +177,7 @@ type alias Scatter a =
 defaultScatterConfig : Scatter a
 defaultScatterConfig =
     { stroke = "black"
-    , fill = "grey"
+    , fill = "transparent"
     , customAttrs = []
     , radius = 5
     }
@@ -335,7 +326,7 @@ defaultLineStyle =
 
 {-| Configures a line.
 -}
-lineStyle : List (StyleAttribute (LineStyle msg)) -> Attribute { a | lineStyle : LineStyle msg }
+lineStyle : List (Attribute (LineStyle msg)) -> Attribute { a | lineStyle : LineStyle msg }
 lineStyle attrs config =
     { config | lineStyle = List.foldr (<|) defaultLineStyle attrs }
 
@@ -433,14 +424,14 @@ tick attributes config =
 
 {-| Configure the default view with style attributes.
 -}
-viewStatic : List (StyleAttribute c) -> Attribute { b | view : View.ViewOption a c msg }
+viewStatic : List (Attribute c) -> Attribute { b | view : View.ViewOption a c msg }
 viewStatic styles config =
     { config | view = View.FromStyle styles }
 
 
 {-| Configure the default view with style attributes based on the view value.
 -}
-viewDynamic : (a -> List (StyleAttribute c)) -> Attribute { b | view : View.ViewOption a c msg }
+viewDynamic : (a -> List (Attribute c)) -> Attribute { b | view : View.ViewOption a c msg }
 viewDynamic toStyle config =
     { config | view = View.FromStyleDynamic toStyle }
 

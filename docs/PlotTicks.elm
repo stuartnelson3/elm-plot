@@ -35,7 +35,7 @@ isOdd n =
     rem n 2 > 0
 
 
-toTickStyle : AxisLabelInfo -> List (StyleAttribute (TickStyle msg))
+toTickStyle : AxisLabelInfo -> List (Attribute (TickStyle msg))
 toTickStyle { index } =
     if isOdd index then
         [ length 7
@@ -47,7 +47,7 @@ toTickStyle { index } =
         ]
 
 
-toLabelStyle : AxisLabelInfo -> List (StyleAttribute (LabelStyle msg))
+toLabelStyle : AxisLabelInfo -> List (Attribute (LabelStyle msg))
 toLabelStyle { index } =
     if isOdd index then
         []
@@ -94,7 +94,7 @@ code =
         rem n 2 > 0
 
 
-    toTickStyle : LabelInfo -> List (StyleAttribute msg)
+    toTickStyle : LabelInfo -> List (Attribute msg)
     toTickStyle { index } =
         if isOdd index then
             [ length 7
@@ -106,7 +106,7 @@ code =
             ]
 
 
-    toLabelStyle : LabelInfo -> List (Label.StyleAttribute msg)
+    toLabelStyle : LabelInfo -> List (Label.Attribute msg)
     toLabelStyle { index } =
         if isOdd index then
             []

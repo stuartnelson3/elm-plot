@@ -2,7 +2,6 @@ module PlotScatter exposing (plotExample)
 
 import Svg
 import Plot exposing (..)
-import Plot.Scatter as Scatter
 import Plot.Attributes as Attributes exposing (..)
 import Common exposing (..)
 
