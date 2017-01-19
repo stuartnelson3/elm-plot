@@ -2,8 +2,7 @@ module PlotSmooth exposing (plotExample)
 
 import Svg
 import Plot exposing (..)
-import Plot.Attributes as Attributes
-import Plot.Axis as Axis
+import Plot.Attributes as Attributes exposing (..)
 import Common exposing (..)
 
 
@@ -43,12 +42,12 @@ view =
             [ Attributes.stroke pinkStroke
             , Attributes.fill pinkFill
             , Attributes.strokeWidth 1
-            , Attributes.smoothingBezier
+            , Attributes.interpolation Bezier
             ]
             data1
         , xAxis
-            [ Axis.line [ Attributes.stroke axisColor ]
-            , Axis.tickDelta 1
+            [ Attributes.lineStyle [ Attributes.stroke axisColor ]
+            , tick [ values (ValuesFromDelta 1) ]
             ]
         ]
 
@@ -72,7 +71,7 @@ code =
                 ]
                 data1
             , xAxis
-                [ Axis.line [ Line.stroke axisColor ]
+                [ Attributes.lineStyle [ Line.stroke axisColor ]
                 , Axis.tickDelta 1
                 ]
             ]

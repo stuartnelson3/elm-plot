@@ -22,9 +22,9 @@ module Plot.Line exposing (..)
 
 -}
 
-import Internal.Line as Internal
+import Plot.Attributes exposing (..)
 
 
 {-| -}
 type alias Attribute a =
-    Internal.Config a -> Internal.Config a
+    LineStyle a -> LineStyle a

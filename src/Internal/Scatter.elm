@@ -5,31 +5,19 @@ import Svg.Attributes
 import Plot.Types exposing (..)
 import Internal.Types exposing (..)
 import Internal.Draw exposing (..)
+import Plot.Attributes exposing (..)
 
 
-type alias Config a =
-    { style : Style
-    , customAttrs : List (Svg.Attribute a)
-    , radius : Int
-    }
-
-
-defaultConfig : Config a
-defaultConfig =
-    { style = [ ( "fill", "transparent" ) ]
-    , customAttrs = []
-    , radius = 5
-    }
-
-
-view : Meta -> Config a -> List Point -> Svg.Svg a
-view meta { style, radius } points =
+view : Meta -> Scatter a -> List Point -> Svg.Svg a
+view meta { fill, stroke, radius } points =
     let
         svgPoints =
             List.map meta.toSvgCoords points
     in
         Svg.g
-            [ Svg.Attributes.style (toStyle style) ]
+            [ Svg.Attributes.fill fill
+            , Svg.Attributes.stroke stroke
+            ]
             (List.map (toSvgCircle radius) svgPoints)
 
 

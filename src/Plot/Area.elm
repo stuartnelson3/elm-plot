@@ -24,9 +24,9 @@ module Plot.Area exposing (..)
 
 -}
 
-import Internal.Area as Internal
+import Plot.Attributes exposing (..)
 
 
 {-| -}
 type alias Attribute a =
-    Internal.Config a -> Internal.Config a
+    AreaStyle a -> AreaStyle a

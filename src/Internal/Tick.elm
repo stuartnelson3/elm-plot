@@ -1,79 +1,28 @@
-module Internal.Tick
-    exposing
-        ( Config
-        , StyleConfig
-        , ViewConfig(..)
-        , View
-        , defaultConfig
-        , defaultStyleConfig
-        , toView
-        )
+module Internal.Tick exposing (toView)
 
-import Plot.Types exposing (Point, Style)
+import Plot.Attributes as Attributes exposing (..)
 import Internal.Types exposing (Orientation(..), Scale, Meta, IndexedInfo)
 import Internal.Draw as Draw exposing (..)
+import Internal.View as View
 import Svg
 import Svg.Attributes
 
 
-type alias Config a msg =
-    { viewConfig : ViewConfig a msg }
+type alias TickInfo a =
+    { a | orientation : Orientation }
 
 
-type alias StyleConfig msg =
-    { length : Int
-    , width : Int
-    , style : Style
-    , classes : List String
-    , customAttrs : List (Svg.Attribute msg)
-    }
+toView : Tick (TickInfo a) msg -> TickInfo a -> Svg.Svg msg
+toView { view } =
+    View.useView
+        { view = view
+        , defaultStyles = defaultTickStyle
+        , defaultView = defaultView
+        }
 
 
-type ViewConfig a msg
-    = FromStyle (StyleConfig msg)
-    | FromStyleDynamic (a -> StyleConfig msg)
-    | FromCustomView (View a msg)
-
-
-type alias View a msg =
-    Orientation -> a -> Svg.Svg msg
-
-
-defaultConfig : Config a msg
-defaultConfig =
-    { viewConfig = FromStyle defaultStyleConfig }
-
-
-defaultStyleConfig : StyleConfig msg
-defaultStyleConfig =
-    { length = 7
-    , width = 1
-    , style = []
-    , classes = []
-    , customAttrs = []
-    }
-
-
-toView : Config a msg -> View a msg
-toView { viewConfig } =
-    case viewConfig of
-        FromStyle styleConfig ->
-            defaultView styleConfig
-
-        FromStyleDynamic toConfig ->
-            toViewFromStyleDynamic toConfig
-
-        FromCustomView view ->
-            view
-
-
-toViewFromStyleDynamic : (a -> StyleConfig msg) -> View a msg
-toViewFromStyleDynamic toStyleConfig orientation info =
-    defaultView (toStyleConfig info) orientation info
-
-
-defaultView : StyleConfig msg -> View a msg
-defaultView { length, width, style, classes, customAttrs } orientation _ =
+defaultView : TickStyle msg -> TickInfo a -> Svg.Svg msg
+defaultView { length, width, style, classes, customAttrs } { orientation } =
     let
         styleFinal =
             style ++ [ ( "stroke-width", toPixelsInt width ) ]

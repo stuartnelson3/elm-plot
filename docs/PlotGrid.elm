@@ -2,7 +2,7 @@ module PlotGrid exposing (plotExample)
 
 import Svg
 import Plot exposing (..)
-import Plot.Attributes as Attributes
+import Plot.Attributes as Attributes exposing (..)
 import Plot.Axis as Axis
 import Plot.Grid as Grid
 import Common exposing (..)
@@ -39,21 +39,21 @@ view =
         , margin ( 10, 20, 40, 20 )
         ]
         [ verticalGrid
-            [ Grid.lines
-                [ Attributes.stroke axisColorLight ]
+            [ lineStyle
+                [ stroke axisColorLight ]
             ]
         , horizontalGrid
-            [ Grid.lines
-                [ Attributes.stroke axisColorLight ]
-            , Grid.values [ 4, 8, 12 ]
+            [ lineStyle
+                [ stroke axisColorLight ]
+            , values (ValuesFromList [ 4, 8, 12 ])
             ]
         , xAxis
-            [ Axis.line [ Attributes.stroke axisColor ]
-            , Axis.tickDelta 0.5
+            [ lineStyle [ stroke axisColor ]
+            , tick [ values (ValuesFromDelta 0.5) ]
             ]
         , line
-            [ Attributes.stroke pinkStroke
-            , Attributes.strokeWidth 3
+            [ stroke pinkStroke
+            , strokeWidth 3
             ]
             data
         ]
@@ -70,20 +70,20 @@ code =
             ]
             [ verticalGrid
                 [ Grid.lines
-                    [ Attributes.stroke axisColorLight ]
+                    [ stroke axisColorLight ]
                 ]
             , horizontalGrid
                 [ Grid.lines
-                    [ Attributes.stroke axisColorLight ]
+                    [ stroke axisColorLight ]
                 , Grid.values [ 4, 8, 12 ]
                 ]
             , xAxis
-                [ Axis.line [ Attributes.stroke axisColor ]
+                [ lineStyle [ stroke axisColor ]
                 , Axis.tickDelta 0.5
                 ]
             , line
-                [ Attributes.stroke blueStroke
-                , Attributes.strokeWidth 2
+                [ stroke blueStroke
+                , strokeWidth 2
                 ]
                 data
             ]

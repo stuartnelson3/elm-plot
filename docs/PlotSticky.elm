@@ -2,10 +2,7 @@ module PlotSticky exposing (plotExample)
 
 import Svg
 import Plot exposing (..)
-import Plot.Attributes as Attributes
-import Plot.Axis as Axis
-import Plot.Tick as Tick
-import Plot.Label as Label
+import Plot.Attributes as Attributes exposing (..)
 import Common exposing (..)
 
 
@@ -13,7 +10,7 @@ plotExample : PlotExample msg
 plotExample =
     { title = title
     , code = code
-    , view = ViewStatic view
+    , view = ViewStatic viewPlot
     , id = id
     }
 
@@ -38,23 +35,23 @@ isOdd n =
     rem n 2 > 0
 
 
-toTickAttrs : List (Tick.StyleAttribute msg)
-toTickAttrs =
-    [ Tick.length 7
-    , Tick.stroke "#e4e3e3"
+tickStyles : List (StyleAttribute (TickStyle msg))
+tickStyles =
+    [ length 7
+    , stroke "#e4e3e3"
     ]
 
 
-toLabelAttrsY : Axis.LabelInfo -> List (Label.StyleAttribute msg)
+toLabelAttrsY : AxisLabelInfo -> List (StyleAttribute (LabelStyle msg))
 toLabelAttrsY { index, value } =
     if not <| isOdd index then
         []
     else
-        [ Label.displace ( -5, 0 ) ]
+        [ displace ( -5, 0 ) ]
 
 
-view : Svg.Svg a
-view =
+viewPlot : Svg.Svg a
+viewPlot =
     plot
         [ size plotSize
         , margin ( 10, 20, 40, 20 )
@@ -62,47 +59,53 @@ view =
         , domainLowest (always -21)
         ]
         [ line
-            [ Attributes.stroke pinkStroke
-            , Attributes.strokeWidth 2
+            [ stroke pinkStroke
+            , strokeWidth 2
             ]
             data
         , xAxis
-            [ Axis.tick
-                [ Tick.view toTickAttrs ]
-            , Axis.tickValues [ 3, 6 ]
-            , Axis.line [ Attributes.stroke Common.axisColor ]
-            , Axis.label
-                [ Label.format (\{ value } -> toString value ++ " ms") ]
-            , Axis.cleanCrossings
+            [ tick
+                [ viewStatic tickStyles
+                , values (ValuesFromList [ 3, 6 ])
+                ]
+            , lineStyle [ stroke Common.axisColor ]
+            , label
+                [ format (FormatFromFunc (\{ value } -> toString value ++ " ms")) ]
+            , clearIntersections
             ]
         , yAxis
-            [ Axis.positionHighest
-            , Axis.cleanCrossings
-            , Axis.tick [ Tick.view toTickAttrs ]
-            , Axis.line [ Attributes.stroke Common.axisColor ]
-            , Axis.label
-                [ Label.viewDynamic toLabelAttrsY
-                , Label.format
-                    (\{ index, value } ->
-                        if not <| isOdd index then
-                            ""
-                        else
-                            toString (value * 10) ++ " x"
+            [ position (PositionHighest)
+            , clearIntersections
+            , tick [ viewStatic tickStyles ]
+            , lineStyle
+                [ stroke Common.axisColor ]
+            , label
+                [ viewDynamic toLabelAttrsY
+                , format
+                    (FormatFromFunc
+                        (\{ index, value } ->
+                            if not <| isOdd index then
+                                ""
+                            else
+                                toString (value * 10) ++ " x"
+                        )
                     )
                 ]
             ]
         , yAxis
-            [ Axis.positionLowest
-            , Axis.cleanCrossings
-            , Axis.anchorInside
-            , Axis.line [ Attributes.stroke Common.axisColor ]
-            , Axis.label
-                [ Label.format
-                    (\{ index, value } ->
-                        if isOdd index then
-                            ""
-                        else
-                            toString (value / 5) ++ "k"
+            [ position (PositionLowest)
+            , clearIntersections
+            , anchor (AnchorInner)
+            , lineStyle [ stroke Common.axisColor ]
+            , label
+                [ format
+                    (FormatFromFunc
+                        (\{ index, value } ->
+                            if isOdd index then
+                                ""
+                            else
+                                toString (value / 5) ++ "k"
+                        )
                     )
                 ]
             ]
@@ -117,19 +120,19 @@ code =
         rem n 2 > 0
 
 
-    toTickAttrs : List (Tick.StyleAttribute msg)
-    toTickAttrs =
-        [ Tick.length 7
-        , Tick.stroke "#e4e3e3"
+    tickStyles : List (StyleAttribute msg)
+    tickStyles =
+        [ length 7
+        , stroke "#e4e3e3"
         ]
 
 
-    toLabelAttrsY : Axis.LabelInfo -> List (Label.StyleAttribute msg)
+    toLabelAttrsY : LabelInfo -> List (StyleAttribute msg)
     toLabelAttrsY { index, value } =
         if not <| isOdd index then
             []
         else
-            [ Label.displace ( -5, 0 ) ]
+            [ displace ( -5, 0 ) ]
 
 
     view : Svg.Svg a
@@ -146,22 +149,22 @@ code =
                 ]
                 data
             , xAxis
-                [ Axis.tick
-                    [ Tick.view toTickAttrs ]
-                , Axis.tickValues [ 3, 6 ]
-                , Axis.line [ Style.stroke axisColor ]
-                , Axis.label
-                    [ Label.format (\\{ value } -> toString value ++ " ms") ]
-                , Axis.cleanCrossings
+                [ tick
+                    [ view toTickAttrs ]
+                , tickValues [ 3, 6 ]
+                , lineStyle [ Style.stroke axisColor ]
+                , label
+                    [ format (\\{ value } -> toString value ++ " ms") ]
+                , clearIntersections
                 ]
             , yAxis
-                [ Axis.positionHighest
-                , Axis.line [ Style.stroke axisColor ]
-                , Axis.cleanCrossings
-                , Axis.tick [ Tick.view toTickAttrs ]
-                , Axis.label
-                    [ Label.viewDynamic toLabelAttrsY
-                    , Label.format
+                [ position (PositionHighest)
+                , lineStyle [ Style.stroke axisColor ]
+                , clearIntersections
+                , tick [ view toTickAttrs ]
+                , label
+                    [ viewDynamic toLabelAttrsY
+                    , format
                         (\\{ index, value } ->
                             if not <| isOdd index then
                                 ""
@@ -171,12 +174,12 @@ code =
                     ]
                 ]
             , yAxis
-                [ Axis.positionLowest
-                , Axis.cleanCrossings
-                , Axis.line [ Style.stroke axisColor ]
-                , Axis.anchorInside
-                , Axis.label
-                    [ Label.format
+                [ position (PositionLowest)
+                , clearIntersections
+                , lineStyle [ Style.stroke axisColor ]
+                , anchor (AnchorInner)
+                , label
+                    [ format
                         (\\{ index, value } ->
                             if isOdd index then
                                 ""

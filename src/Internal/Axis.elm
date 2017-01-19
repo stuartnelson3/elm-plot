@@ -1,84 +1,27 @@
 module Internal.Axis
     exposing
-        ( Config
-        , PositionOption(..)
-        , ValueConfig(..)
-        , defaultConfigX
-        , defaultConfigY
-        , view
+        ( view
         , getAxisPosition
         , getValues
         , getDelta
         )
 
 import Plot.Types exposing (..)
-import Internal.Types exposing (Orientation(..), Scale, Meta, Anchor(..), IndexedInfo)
+import Internal.Types exposing (Orientation(..), Scale, Meta, IndexedInfo)
 import Internal.Tick as Tick
 import Internal.Label as Label
 import Internal.Line as Line
 import Internal.Draw as Draw exposing (..)
 import Internal.Stuff exposing (..)
+import Plot.Attributes as Attributes exposing (Axis, AxisLabelInfo, AnchorOption(..), PositionOption(..), ValuesOption(..))
 import Svg
 import Svg.Attributes
 import Round
 import Regex
 
 
-type alias Config msg =
-    { tickConfig : Tick.Config LabelInfo msg
-    , tickValues : ValueConfig
-    , labelConfig : Label.Config LabelInfo msg
-    , labelValues : Maybe (List Value)
-    , lineConfig : Line.Config msg
-    , orientation : Orientation
-    , anchor : Anchor
-    , cleanCrossings : Bool
-    , position : PositionOption
-    , classes : List String
-    }
-
-
-type PositionOption
-    = Lowest
-    | Highest
-    | AtZero
-
-
-type ValueConfig
-    = AutoValues
-    | FromDelta Float
-    | FromCount Int
-    | FromCustom (List Float)
-
-
-type alias LabelInfo =
-    { value : Float
-    , index : Int
-    }
-
-
-defaultConfigX : Config msg
-defaultConfigX =
-    { tickConfig = Tick.defaultConfig
-    , tickValues = AutoValues
-    , labelConfig = Label.toDefaultConfig (.value >> toString)
-    , labelValues = Nothing
-    , lineConfig = Line.defaultConfig
-    , orientation = X
-    , cleanCrossings = False
-    , anchor = Outer
-    , position = AtZero
-    , classes = []
-    }
-
-
-defaultConfigY : Config msg
-defaultConfigY =
-    { defaultConfigX | orientation = Y }
-
-
-view : Meta -> Config msg -> Svg.Svg msg
-view ({ scale, toSvgCoords, oppositeAxisCrossings } as meta) ({ lineConfig, tickConfig, labelConfig, orientation, cleanCrossings, position, anchor, classes } as config) =
+view : Meta -> Axis msg -> Svg.Svg msg
+view ({ scale, toSvgCoords, oppositeAxisCrossings } as meta) ({ lineStyle, tick, label, orientation, clearIntersections, position, anchor, classes } as config) =
     let
         tickValues =
             toTickValues meta config
@@ -91,15 +34,15 @@ view ({ scale, toSvgCoords, oppositeAxisCrossings } as meta) ({ lineConfig, tick
     in
         Svg.g
             [ Draw.classAttributeOriented "axis" orientation classes ]
-            [ viewAxisLine lineConfig meta axisPosition
+            [ viewAxisLine lineStyle meta axisPosition
             , Svg.g
                 [ Svg.Attributes.class "elm-plot__axis__ticks" ]
-                (List.map (placeTick meta config axisPosition (Tick.toView tickConfig orientation)) (toIndexInfo tickValues))
+                (List.map (placeTick meta config axisPosition (Tick.toView tick)) (toIndexInfo orientation tickValues))
             , Svg.g
                 [ Svg.Attributes.class "elm-plot__axis__labels"
                 , Svg.Attributes.style <| toAnchorStyle anchor orientation
                 ]
-                (Label.view labelConfig (placeLabel meta config axisPosition) (toIndexInfo labelValues))
+                (Label.view label (viewLabel meta config axisPosition) (toIndexInfo orientation labelValues))
             ]
 
 
@@ -107,7 +50,7 @@ view ({ scale, toSvgCoords, oppositeAxisCrossings } as meta) ({ lineConfig, tick
 -- View line
 
 
-viewAxisLine : Line.Config msg -> Meta -> Float -> Svg.Svg msg
+viewAxisLine : Attributes.LineStyle msg -> Meta -> Float -> Svg.Svg msg
 viewAxisLine config meta position =
     Line.view meta config [ ( meta.scale.x.lowest, position ), ( meta.scale.x.highest, position ) ]
 
@@ -116,18 +59,27 @@ viewAxisLine config meta position =
 -- View labels
 
 
-placeLabel : Meta -> Config msg -> Float -> LabelInfo -> List (Svg.Attribute msg)
-placeLabel { toSvgCoords } ({ orientation, anchor } as config) axisPosition info =
-    [ Svg.Attributes.transform <| toTranslate <| addDisplacement (getDisplacement anchor orientation) <| toSvgCoords ( info.value, axisPosition )
-    , Svg.Attributes.class "elm-plot__axis__label"
-    ]
+viewLabel : Meta -> Axis msg -> Float -> AxisLabelInfo -> Svg.Svg msg -> Svg.Svg msg
+viewLabel meta config axisPosition info view =
+    Svg.g
+        [ Svg.Attributes.transform (getLabelPosition meta config axisPosition info)
+        , Svg.Attributes.class "elm-plot__axis__label"
+        ]
+        [ view ]
+
+
+getLabelPosition : Meta -> Axis msg -> Float -> AxisLabelInfo -> String
+getLabelPosition { toSvgCoords } { orientation, anchor } axisPosition info =
+    toSvgCoords ( info.value, axisPosition )
+        |> addDisplacement (getDisplacement anchor orientation)
+        |> toTranslate
 
 
 
 -- View ticks
 
 
-placeTick : Meta -> Config msg -> Float -> (LabelInfo -> Svg.Svg msg) -> LabelInfo -> Svg.Svg msg
+placeTick : Meta -> Axis msg -> Float -> (AxisLabelInfo -> Svg.Svg msg) -> AxisLabelInfo -> Svg.Svg msg
 placeTick { toSvgCoords } ({ orientation, anchor } as config) axisPosition view info =
     Svg.g
         [ Svg.Attributes.transform <| (toTranslate <| toSvgCoords ( info.value, axisPosition )) ++ " " ++ (toRotate anchor orientation)
@@ -139,17 +91,17 @@ placeTick { toSvgCoords } ({ orientation, anchor } as config) axisPosition view 
 getAxisPosition : Scale -> PositionOption -> Float
 getAxisPosition { lowest, highest } position =
     case position of
-        AtZero ->
+        PositionAtZero ->
             clamp lowest highest 0
 
-        Lowest ->
+        PositionLowest ->
             lowest
 
-        Highest ->
+        PositionHighest ->
             highest
 
 
-toAnchorStyle : Anchor -> Orientation -> String
+toAnchorStyle : Attributes.AnchorOption -> Orientation -> String
 toAnchorStyle anchor orientation =
     case orientation of
         X ->
@@ -159,61 +111,61 @@ toAnchorStyle anchor orientation =
             "text-anchor:" ++ getYAnchorStyle anchor ++ ";"
 
 
-getYAnchorStyle : Anchor -> String
+getYAnchorStyle : Attributes.AnchorOption -> String
 getYAnchorStyle anchor =
     case anchor of
-        Inner ->
+        Attributes.AnchorInner ->
             "start"
 
-        Outer ->
+        Attributes.AnchorOuter ->
             "end"
 
 
 {-| The displacements are just magic numbers, so no science. (Just defaults)
 -}
-getDisplacement : Anchor -> Orientation -> Point
+getDisplacement : Attributes.AnchorOption -> Orientation -> Point
 getDisplacement anchor orientation =
     case orientation of
         X ->
             case anchor of
-                Inner ->
+                Attributes.AnchorInner ->
                     ( 0, -15 )
 
-                Outer ->
+                Attributes.AnchorOuter ->
                     ( 0, 25 )
 
         Y ->
             case anchor of
-                Inner ->
+                Attributes.AnchorInner ->
                     ( 10, 5 )
 
-                Outer ->
+                Attributes.AnchorOuter ->
                     ( -10, 5 )
 
 
-toRotate : Anchor -> Orientation -> String
+toRotate : Attributes.AnchorOption -> Orientation -> String
 toRotate anchor orientation =
     case orientation of
         X ->
             case anchor of
-                Inner ->
+                Attributes.AnchorInner ->
                     "rotate(180 0 0)"
 
-                Outer ->
+                Attributes.AnchorOuter ->
                     "rotate(0 0 0)"
 
         Y ->
             case anchor of
-                Inner ->
+                Attributes.AnchorInner ->
                     "rotate(-90 0 0)"
 
-                Outer ->
+                Attributes.AnchorOuter ->
                     "rotate(90 0 0)"
 
 
-filterValues : Meta -> Config msg -> List Float -> List Float
+filterValues : Meta -> Axis msg -> List Float -> List Float
 filterValues meta config values =
-    if config.cleanCrossings then
+    if config.clearIntersections then
         List.filter (isCrossing meta.oppositeAxisCrossings) values
     else
         values
@@ -229,34 +181,39 @@ isCrossing crossings value =
 -- just the scale we work with. It will also be the right one for the y-axis.
 
 
-toTickValues : Meta -> Config msg -> List Value
+toTickValues : Meta -> Axis msg -> List Value
 toTickValues meta config =
-    getValues config.tickValues meta.scale.x
+    getValues config.tick.values meta.scale.x
         |> filterValues meta config
 
 
-toLabelValues : Config msg -> List Value -> List Value
+toLabelValues : Axis msg -> List Value -> List Value
 toLabelValues config tickValues =
-    Maybe.withDefault tickValues config.labelValues
+    case config.label.values of
+        ValuesFromList values ->
+            values
+
+        ValuesFromDelta delta ->
+            []
+
+        ValuesAuto ->
+            tickValues
 
 
 
 -- Resolve values
 
 
-getValues : ValueConfig -> Scale -> List Value
+getValues : ValuesOption -> Scale -> List Value
 getValues config =
     case config of
-        AutoValues ->
+        ValuesAuto ->
             toValuesAuto
 
-        FromDelta delta ->
+        ValuesFromDelta delta ->
             toValuesFromDelta delta
 
-        FromCount count ->
-            toValuesFromCount count
-
-        FromCustom values ->
+        ValuesFromList values ->
             always values
 
 
@@ -352,8 +309,8 @@ toValuesAuto =
 -- Helpers
 
 
-toIndexInfo : List Value -> List (IndexedInfo {})
-toIndexInfo values =
+toIndexInfo : Orientation -> List Value -> List AxisLabelInfo
+toIndexInfo orientation values =
     let
         lowerThanZero =
             List.length (List.filter (\v -> v < 0) values)
@@ -361,11 +318,11 @@ toIndexInfo values =
         hasZero =
             List.any (\v -> v == 0) values
     in
-        List.indexedMap (zipWithDistance hasZero lowerThanZero) values
+        List.indexedMap (zipWithDistance orientation hasZero lowerThanZero) values
 
 
-zipWithDistance : Bool -> Int -> Int -> Value -> IndexedInfo {}
-zipWithDistance hasZero lowerThanZero index value =
+zipWithDistance : Orientation -> Bool -> Int -> Int -> Value -> AxisLabelInfo
+zipWithDistance orientation hasZero lowerThanZero index value =
     let
         distance =
             if value == 0 then
@@ -377,4 +334,8 @@ zipWithDistance hasZero lowerThanZero index value =
             else
                 lowerThanZero - index
     in
-        { index = distance, value = value }
+        { index = distance
+        , value = value
+        , orientation = orientation
+        , text = ""
+        }

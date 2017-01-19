@@ -2,12 +2,8 @@ module PlotComposed exposing (view, code, id)
 
 import Svg
 import Plot exposing (..)
-import Plot.Attributes as Attributes
-import Plot.Grid as Grid
-import Plot.Axis as Axis
-import Plot.Tick as Tick
+import Plot.Attributes as Attributes exposing (..)
 import Plot.Hint as Hint
-import Plot.Label as Label
 import Common exposing (..)
 
 
@@ -31,27 +27,27 @@ isOdd n =
     rem n 2 > 0
 
 
-filterLabels : Axis.LabelInfo -> Bool
+filterLabels : AxisLabelInfo -> Bool
 filterLabels { index } =
     not (isOdd index)
 
 
-toTickStyle : Axis.LabelInfo -> List (Tick.StyleAttribute msg)
+toTickStyle : AxisLabelInfo -> List (StyleAttribute (TickStyle msg))
 toTickStyle { index } =
     if isOdd index then
-        [ Tick.length 7
-        , Tick.stroke "#e4e3e3"
+        [ length 7
+        , stroke "#e4e3e3"
         ]
     else
-        [ Tick.length 10
-        , Tick.stroke "#b9b9b9"
+        [ length 10
+        , stroke "#b9b9b9"
         ]
 
 
-labelStyle : List (Label.StyleAttribute msg)
+labelStyle : List (StyleAttribute (LabelStyle msg))
 labelStyle =
-    [ Label.fontSize 12
-    , Label.displace ( 0, -2 )
+    [ fontSize 12
+    , displace ( 0, -2 )
     ]
 
 
@@ -63,74 +59,77 @@ view state =
         , margin ( 15, 20, 40, 15 )
         ]
         [ horizontalGrid
-            [ Grid.lines [ Attributes.stroke "#f2f2f2" ] ]
+            [ lineStyle [ stroke "#f2f2f2" ] ]
         , verticalGrid
-            [ Grid.lines [ Attributes.stroke "#f2f2f2" ] ]
+            [ lineStyle [ stroke "#f2f2f2" ] ]
         , area
-            [ Attributes.stroke skinStroke
-            , Attributes.fill skinFill
-            , Attributes.opacity 0.5
-            , Attributes.smoothingBezier
+            [ stroke skinStroke
+            , fill skinFill
+            , opacity 0.5
+            , interpolation Bezier
             ]
             (List.map (\( x, y ) -> ( x, toFloat <| round (y * 2.1) )) data1)
         , area
-            [ Attributes.stroke blueStroke
-            , Attributes.fill blueFill
-            , Attributes.smoothingBezier
+            [ stroke blueStroke
+            , fill blueFill
+            , interpolation Bezier
             ]
             data1
         , line
-            [ Attributes.stroke pinkStroke
-            , Attributes.smoothingBezier
-            , Attributes.strokeWidth 2
+            [ stroke pinkStroke
+            , interpolation Bezier
+            , strokeWidth 2
             ]
             (List.map (\( x, y ) -> ( x, toFloat <| round y * 3 )) data1)
         , scatter
             []
             dataScat
         , yAxis
-            [ Axis.anchorInside
-            , Axis.cleanCrossings
-            , Axis.positionLowest
-            , Axis.line
-                [ Attributes.stroke "#b9b9b9" ]
-            , Axis.tickDelta 50
-            , Axis.label
-                [ Label.view labelStyle
-                , Label.format (\{ value } -> toString value ++ " °C")
+            [ anchor (AnchorInner)
+            , clearIntersections
+            , position (PositionLowest)
+            , lineStyle
+                [ stroke "#b9b9b9" ]
+            , tick [ values (ValuesFromDelta 50) ]
+            , label
+                [ viewStatic labelStyle
+                , format (FormatFromFunc (\{ value } -> toString value ++ " °C"))
                 ]
             ]
         , xAxis
-            [ Axis.cleanCrossings
-            , Axis.line
-                [ Attributes.stroke "#b9b9b9" ]
-            , Axis.tickDelta 2.5
-            , Axis.tick
-                [ Tick.viewDynamic toTickStyle ]
-            , Axis.label
-                [ Label.view
-                    [ Label.fontSize 12
-                    , Label.stroke "#b9b9b9"
+            [ clearIntersections
+            , lineStyle
+                [ stroke "#b9b9b9" ]
+            , tick
+                [ values (ValuesFromDelta 2.5)
+                , viewDynamic toTickStyle
+                ]
+            , label
+                [ viewStatic
+                    [ fontSize 12
+                    , stroke "#b9b9b9"
                     ]
-                , Label.format (\{ value } -> toString value ++ " x")
+                , format (FormatFromFunc (\{ value } -> toString value ++ " x"))
                 ]
             ]
         , xAxis
-            [ Axis.positionLowest
-            , Axis.line [ Attributes.stroke "#b9b9b9" ]
-            , Axis.tick
-                [ Tick.viewDynamic toTickStyle ]
-            , Axis.label
-                [ Label.view
-                    [ Label.fontSize 12
-                    , Label.stroke "#b9b9b9"
+            [ position (PositionLowest)
+            , lineStyle [ stroke "#b9b9b9" ]
+            , tick
+                [ viewDynamic toTickStyle ]
+            , label
+                [ viewStatic
+                    [ fontSize 12
+                    , stroke "#b9b9b9"
                     ]
-                , Label.format
-                    (\{ value, index } ->
-                        if isOdd index then
-                            ""
-                        else
-                            toString value ++ " t"
+                , format
+                    (FormatFromFunc
+                        (\{ value, index } ->
+                            if isOdd index then
+                                ""
+                            else
+                                toString value ++ " t"
+                        )
                     )
                 ]
             ]
@@ -153,22 +152,22 @@ code =
         not (isOdd index)
 
 
-    toTickStyle : Axis.LabelInfo -> List (Tick.StyleAttribute msg)
+    toTickStyle : Axis.LabelInfo -> List (StyleAttribute msg)
     toTickStyle { index } =
         if isOdd index then
-            [ Tick.length 7
-            , Tick.stroke "#e4e3e3"
+            [ length 7
+            , stroke "#e4e3e3"
             ]
         else
-            [ Tick.length 10
-            , Tick.stroke "#b9b9b9"
+            [ length 10
+            , stroke "#b9b9b9"
             ]
 
 
-    labelStyle : List (Label.StyleAttribute msg)
+    labelStyle : List (StyleAttribute msg)
     labelStyle =
-        [ Label.fontSize 12
-        , Label.displace ( 0, -2 )
+        [ fontSize 12
+        , displace ( 0, -2 )
         ]
 
 
@@ -180,66 +179,66 @@ code =
             , margin ( 15, 20, 40, 15 )
             ]
             [ horizontalGrid
-                [ Grid.lines [ Attributes.stroke "#f2f2f2" ] ]
+                [ Grid.lines [ stroke "#f2f2f2" ] ]
             , verticalGrid
-                [ Grid.lines [ Attributes.stroke "#f2f2f2" ] ]
+                [ Grid.lines [ stroke "#f2f2f2" ] ]
             , area
-                [ Attributes.stroke skinStroke
-                , Attributes.fill skinFill
-                , Attributes.opacity 0.5
+                [ stroke skinStroke
+                , fill skinFill
+                , opacity 0.5
                 ]
                 data1
             , area
-                [ Attributes.stroke blueStroke
-                , Attributes.fill blueFill
+                [ stroke blueStroke
+                , fill blueFill
                 ]
                 data1
             , line
-                [ Attributes.stroke pinkStroke
-                , Attributes.strokeWidth 2
+                [ stroke pinkStroke
+                , strokeWidth 2
                 ]
                 data2
             , scatter
                 []
                 data3
             , yAxis
-                [ Axis.anchorInside
-                , Axis.cleanCrossings
-                , Axis.positionLowest
-                , Axis.line
-                    [ Attributes.stroke "#b9b9b9" ]
+                [ anchor (AnchorInner)
+                , clearIntersections
+                , position (PositionLowest)
+                , lineStyle
+                    [ stroke "#b9b9b9" ]
                 , Axis.tickDelta 50
                 , Axis.label
-                    [ Label.view labelStyle
-                    , Label.format (\\{ value } -> toString value ++ " °C")
+                    [ view labelStyle
+                    , format (\\{ value } -> toString value ++ " °C")
                     ]
                 ]
             , xAxis
-                [ Axis.cleanCrossings
-                , Axis.line
-                    [ Attributes.stroke "#b9b9b9" ]
+                [ clearIntersections
+                , lineStyle
+                    [ stroke "#b9b9b9" ]
                 , Axis.tickDelta 2.5
                 , Axis.tick
-                    [ Tick.viewDynamic toTickStyle ]
+                    [ viewDynamic toTickStyle ]
                 , Axis.label
-                    [ Label.view
-                        [ Label.fontSize 12
-                        , Label.stroke "#b9b9b9"
+                    [ view
+                        [ fontSize 12
+                        , stroke "#b9b9b9"
                         ]
-                    , Label.format (\\{ value } -> toString value ++ " x")
+                    , format (\\{ value } -> toString value ++ " x")
                     ]
                 ]
             , xAxis
-                [ Axis.positionLowest
-                , Axis.line [ Attributes.stroke "#b9b9b9" ]
+                [ position (PositionLowest)
+                , lineStyle [ stroke "#b9b9b9" ]
                 , Axis.tick
-                    [ Tick.viewDynamic toTickStyle ]
+                    [ viewDynamic toTickStyle ]
                 , Axis.label
-                    [ Label.view
-                        [ Label.fontSize 12
-                        , Label.stroke "#b9b9b9"
+                    [ view
+                        [ fontSize 12
+                        , stroke "#b9b9b9"
                         ]
-                    , Label.format
+                    , format
                         (\\{ value, index } ->
                             if isOdd index then
                                 ""

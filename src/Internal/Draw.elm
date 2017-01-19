@@ -20,8 +20,9 @@ module Internal.Draw
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes
 import Plot.Types exposing (Point)
-import Internal.Types exposing (Meta, Orientation, Smoothing(..))
+import Internal.Types exposing (Meta, Orientation)
 import Internal.Stuff exposing (..)
+import Plot.Attributes exposing (InterpolationOption(..))
 
 
 {- Common drawing functions. -}
@@ -138,10 +139,10 @@ pointToString meta point =
         (toString x) ++ "," ++ (toString y)
 
 
-toLinePath : Smoothing -> List Point -> List PathType
-toLinePath smoothing =
-    case smoothing of
-        None ->
+toLinePath : InterpolationOption -> List Point -> List PathType
+toLinePath interpolation =
+    case interpolation of
+        NoInterpolation ->
             List.map L
 
         Bezier ->

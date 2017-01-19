@@ -6,6 +6,7 @@ import Common exposing (..)
 import Plot.Area as Area
 import Plot.Line as Line
 import Plot.Axis as Axis
+import Plot.Attributes exposing (..)
 
 
 plotExample : PlotExample msg
@@ -44,20 +45,20 @@ view =
         , margin ( 10, 20, 40, 20 )
         ]
         [ area
-            [ Area.stroke skinStroke
-            , Area.smoothingBezier
-            , Area.fill skinFill
+            [ stroke skinStroke
+            , smoothingBezier
+            , fill skinFill
             ]
             data1
         , area
-            [ Area.stroke blueStroke
-            , Area.smoothingBezier
-            , Area.fill blueFill
+            [ stroke blueStroke
+            , interpolation Bezier
+            , fill blueFill
             ]
             data2
         , xAxis
-            [ Axis.line [ Line.stroke axisColor ]
-            , Axis.tickDelta 10
+            [ lineStyle [ stroke axisColor ]
+            , tick [ values (ValuesFromDelta 10) ]
             ]
         ]
 
@@ -72,17 +73,17 @@ code =
             , margin ( 10, 20, 40, 20 )
             ]
             [ area
-                [ Area.stroke skinStroke
-                , Area.fill skinFill
+                [ stroke skinStroke
+                , fill skinFill
                 ]
                 data1
             , area
-                [ Area.stroke blueStroke
-                , Area.fill blueFill
+                [ stroke blueStroke
+                , fill blueFill
                 ]
                 data2
             , xAxis
-                [ Axis.line [ Line.stroke axisColor ]
+                [ Attributes.lineStyle [ Line.stroke axisColor ]
                 , Axis.tickDelta 10
                 ]
             ]

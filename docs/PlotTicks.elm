@@ -2,10 +2,7 @@ module PlotTicks exposing (plotExample)
 
 import Svg
 import Plot exposing (..)
-import Plot.Attributes as Attributes
-import Plot.Axis as Axis
-import Plot.Tick as Tick
-import Plot.Label as Label
+import Plot.Attributes as Attributes exposing (..)
 import Common exposing (..)
 
 
@@ -38,24 +35,24 @@ isOdd n =
     rem n 2 > 0
 
 
-toTickStyle : Axis.LabelInfo -> List (Tick.StyleAttribute msg)
+toTickStyle : AxisLabelInfo -> List (StyleAttribute (TickStyle msg))
 toTickStyle { index } =
     if isOdd index then
-        [ Tick.length 7
-        , Tick.stroke "#e4e3e3"
+        [ length 7
+        , stroke "#e4e3e3"
         ]
     else
-        [ Tick.length 10
-        , Tick.stroke "#b9b9b9"
+        [ length 10
+        , stroke "#b9b9b9"
         ]
 
 
-toLabelStyle : Axis.LabelInfo -> List (Label.StyleAttribute msg)
+toLabelStyle : AxisLabelInfo -> List (StyleAttribute (LabelStyle msg))
 toLabelStyle { index } =
     if isOdd index then
         []
     else
-        [ Label.stroke "#969696"
+        [ stroke "#969696"
         ]
 
 
@@ -66,22 +63,24 @@ view =
         , margin ( 10, 20, 40, 20 )
         ]
         [ line
-            [ Attributes.stroke pinkStroke
-            , Attributes.strokeWidth 2
+            [ stroke pinkStroke
+            , strokeWidth 2
             ]
             data
         , xAxis
-            [ Axis.line [ Attributes.stroke axisColor ]
-            , Axis.tick [ Tick.viewDynamic toTickStyle ]
-            , Axis.label
-                [ Label.format
-                    (\{ index, value } ->
-                        if isOdd index then
-                            ""
-                        else
-                            toString value ++ " s"
+            [ lineStyle [ stroke axisColor ]
+            , tick [ viewDynamic toTickStyle ]
+            , label
+                [ format
+                    (FormatFromFunc
+                        (\{ index, value } ->
+                            if isOdd index then
+                                ""
+                            else
+                                toString value ++ " s"
+                        )
                     )
-                , Label.viewDynamic toLabelStyle
+                , viewDynamic toLabelStyle
                 ]
             ]
         ]
@@ -95,19 +94,19 @@ code =
         rem n 2 > 0
 
 
-    toTickStyle : Axis.LabelInfo -> List (Tick.StyleAttribute msg)
+    toTickStyle : LabelInfo -> List (StyleAttribute msg)
     toTickStyle { index } =
         if isOdd index then
-            [ Tick.length 7
-            , Tick.stroke "#e4e3e3"
+            [ length 7
+            , stroke "#e4e3e3"
             ]
         else
-            [ Tick.length 10
-            , Tick.stroke "#b9b9b9"
+            [ length 10
+            , stroke "#b9b9b9"
             ]
 
 
-    toLabelStyle : Axis.LabelInfo -> List (Label.StyleAttribute msg)
+    toLabelStyle : LabelInfo -> List (Label.StyleAttribute msg)
     toLabelStyle { index } =
         if isOdd index then
             []
@@ -128,9 +127,9 @@ code =
                 ]
                 data
             , xAxis
-                [ Axis.line [ Style.stroke axisColor ]
-                , Axis.tick [ Tick.viewDynamic toTickStyle ]
-                , Axis.label
+                [ lineStyle [ Style.stroke axisColor ]
+                , tick [ viewDynamic toTickStyle ]
+                , label
                     [ Label.format
                         (\\{ index, value } ->
                             if isOdd index then

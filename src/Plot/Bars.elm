@@ -4,14 +4,6 @@ module Plot.Bars
         , StyleAttribute
         , DataTransformers
         , Data
-        , LabelInfo
-        , stackByY
-        , maxBarWidth
-        , maxBarWidthPer
-        , label
-        , fill
-        , opacity
-        , customAttrs
         , toBarData
         )
 
@@ -41,129 +33,36 @@ module Plot.Bars
             )
 
 # Definition
-@docs Attribute
+@docs Attribute, StyleAttribute
 
-# Attributes
-@docs maxBarWidth, maxBarWidthPer, stackByY
-
-## Labels
-@docs LabelInfo, label
-
-# Individual bar attributes
-  These are the attributes which can be passed in the list of bar styles in the
-  second argument of your series.
-
-    myBarsSerie : Plot.Element msg
-    myBarsSerie =
-        bars
-            []
-            [ [ Bars.fill "blue", Bars.opacity 0.5 ]
-            , [ Bars.fill "red" ]
-            ]
-            data
-
-@docs StyleAttribute, fill, opacity, customAttrs
 
 # Custom data
 @docs Data, DataTransformers, toBarData
 
 -}
 
-import Svg
 import Plot.Types exposing (Style, Point, Value)
-import Internal.Types exposing (Orientation(..), MaxWidth(..), IndexedInfo)
-import Internal.Bars as Internal
-import Internal.Label as LabelInternal
-import Plot.Label as Label
+import Plot.Attributes as Attributes exposing (..)
 
 
 {-| -}
 type alias Attribute msg =
-    Internal.Config msg -> Internal.Config msg
+    Bars msg -> Bars msg
 
 
 {-| -}
 type alias StyleAttribute msg =
-    Internal.StyleConfig msg -> Internal.StyleConfig msg
+    BarsStyle msg -> BarsStyle msg
 
 
 {-| The data format the bars element requires.
 -}
 type alias Data =
-    Internal.Group
-
-
-{-| The info your label format option will be passed.
--}
-type alias LabelInfo =
-    { index : Int
-    , xValue : Value
-    , yValue : Value
-    }
-
-
-{-| Set a fixed max width (in pixels) on your bars.
--}
-maxBarWidth : Int -> Attribute msg
-maxBarWidth max config =
-    { config | maxWidth = Fixed max }
-
-
-{-| Set a relative max width (in percentage) your bars.
--}
-maxBarWidthPer : Int -> Attribute msg
-maxBarWidthPer max config =
-    { config | maxWidth = Percentage max }
-
-
-{-| Alter the view of your label.
-
-    myBarSeries : Plot.Element msg
-    myBarSeries =
-      bars
-          [ Bars.label
-              [ Label.classes [ "label-class" ]
-              , Label.displace ( 12, 0 )
-              ]
-          ]
-          barStyles
-          data
--}
-label : List (Label.Attribute LabelInfo msg) -> Attribute msg
-label attributes config =
-    { config | labelConfig = List.foldl (<|) LabelInternal.defaultConfig attributes }
-
-
-{-| By default your bars are stacked by x. If you want to stack them y, add this attribute.
--}
-stackByY : Attribute msg
-stackByY config =
-    { config | stackBy = Y }
+    Group
 
 
 
 -- STYLES
-
-
-{-| Set the fill color.
--}
-fill : String -> StyleAttribute msg
-fill fill config =
-    { config | style = ( "fill", fill ) :: config.style }
-
-
-{-| Set the opacity.
--}
-opacity : Float -> StyleAttribute msg
-opacity opacity config =
-    { config | style = ( "opacity", toString opacity ) :: config.style }
-
-
-{-| Add your own attributes. For events, see [this example](https://github.com/terezka/elm-plot/blob/master/examples/Interactive.elm)
--}
-customAttrs : List (Svg.Attribute msg) -> StyleAttribute msg
-customAttrs attrs config =
-    { config | customAttrs = attrs }
 
 
 {-| The functions necessary to transform your data into the format the plot requires.

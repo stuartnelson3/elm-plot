@@ -88,18 +88,19 @@ import Internal.Stuff exposing (..)
 import Internal.Types exposing (..)
 import Internal.Draw exposing (..)
 import Internal.Scale exposing (..)
+import Plot.Attributes as Attributes exposing (..)
 
 
 {-| Represents a child element of the plot.
 -}
 type Element msg
-    = Line (LineInternal.Config msg) (List Point)
-    | Area (AreaInternal.Config msg) (List Point)
-    | Bars (BarsInternal.Config msg) (List (BarsInternal.StyleConfig msg)) (List Bars.Data)
-    | Scatter (ScatterInternal.Config msg) (List Point)
+    = Line (LineStyle msg) (List Point)
+    | Area (AreaStyle msg) (List Point)
+    | Bars (Bars msg) (List (BarsStyle msg)) (List Bars.Data)
+    | Scatter (Scatter msg) (List Point)
     | Hint (HintInternal.Config msg) (Maybe Point)
-    | Axis (AxisInternal.Config msg)
-    | Grid (GridInternal.Config msg)
+    | Axis (Axis msg)
+    | Grid (Grid msg)
     | CustomElement ((Point -> Point) -> Svg.Svg msg)
 
 
@@ -237,43 +238,43 @@ rangeHighest toHighest ({ range } as config) =
 {-| -}
 xAxis : List (Axis.Attribute msg) -> Element msg
 xAxis attrs =
-    Axis (List.foldl (<|) AxisInternal.defaultConfigX attrs)
+    Axis (List.foldl (<|) defaultAxisConfig attrs)
 
 
 {-| -}
 yAxis : List (Axis.Attribute msg) -> Element msg
 yAxis attrs =
-    Axis (List.foldl (<|) AxisInternal.defaultConfigY attrs)
+    Axis (List.foldl (<|) { defaultAxisConfig | orientation = Y } attrs)
 
 
 {-| -}
 horizontalGrid : List (Grid.Attribute msg) -> Element msg
 horizontalGrid attrs =
-    Grid (List.foldr (<|) GridInternal.defaultConfigX attrs)
+    Grid (List.foldr (<|) defaultGridConfig attrs)
 
 
 {-| -}
 verticalGrid : List (Grid.Attribute msg) -> Element msg
 verticalGrid attrs =
-    Grid (List.foldr (<|) GridInternal.defaultConfigY attrs)
+    Grid (List.foldr (<|) { defaultGridConfig | orientation = Y } attrs)
 
 
 {-| -}
 area : List (Area.Attribute msg) -> List Point -> Element msg
 area attrs points =
-    Area (List.foldr (<|) AreaInternal.defaultConfig attrs) points
+    Area (List.foldr (<|) defaultAreaStyle attrs) points
 
 
 {-| -}
 line : List (Line.Attribute msg) -> List Point -> Element msg
 line attrs points =
-    Line (List.foldr (<|) LineInternal.defaultConfig attrs) points
+    Line (List.foldr (<|) defaultLineStyle attrs) points
 
 
 {-| -}
 scatter : List (Scatter.Attribute msg) -> List Point -> Element msg
 scatter attrs =
-    Scatter (List.foldr (<|) ScatterInternal.defaultConfig attrs)
+    Scatter (List.foldr (<|) defaultScatterConfig attrs)
 
 
 {-| This wraps all your bar series.
@@ -281,8 +282,8 @@ scatter attrs =
 bars : List (Bars.Attribute msg) -> List (List (Bars.StyleAttribute msg)) -> List Bars.Data -> Element msg
 bars attrs styleAttrsList groups =
     Bars
-        (List.foldr (<|) BarsInternal.defaultConfig attrs)
-        (List.map (List.foldr (<|) BarsInternal.defaultStyleConfig) styleAttrsList)
+        (List.foldr (<|) defaultBarsConfig attrs)
+        (List.map (List.foldr (<|) defaultBarsStyle) styleAttrsList)
         groups
 
 
@@ -650,7 +651,7 @@ foldInternalBoundsArea bounds =
     { bounds | y = Just (foldBounds bounds.y { lower = 0, upper = 0 }) }
 
 
-foldInternalBoundsBars : BarsInternal.Config msg -> List BarsInternal.Group -> Oriented (Maybe Edges) -> Oriented (Maybe Edges)
+foldInternalBoundsBars : Bars msg -> List Group -> Oriented (Maybe Edges) -> Oriented (Maybe Edges)
 foldInternalBoundsBars config groups bounds =
     let
         allBarPoints =
@@ -702,12 +703,12 @@ getHintInfo elements xValue =
     Hint.HintInfo xValue <| List.foldr (collectYValues xValue) [] elements
 
 
-toAxisConfigsOriented : List (Element msg) -> Oriented (List (AxisInternal.Config msg))
+toAxisConfigsOriented : List (Element msg) -> Oriented (List (Axis msg))
 toAxisConfigsOriented =
     List.foldr foldAxisConfigs { x = [], y = [] }
 
 
-foldAxisConfigs : Element msg -> Oriented (List (AxisInternal.Config msg)) -> Oriented (List (AxisInternal.Config msg))
+foldAxisConfigs : Element msg -> Oriented (List (Axis msg)) -> Oriented (List (Axis msg))
 foldAxisConfigs element axisConfigs =
     case element of
         Axis ({ orientation } as config) ->
@@ -717,11 +718,12 @@ foldAxisConfigs element axisConfigs =
             axisConfigs
 
 
-getLastGetTickValues : List (AxisInternal.Config msg) -> Scale -> List Value
+getLastGetTickValues : List (Axis msg) -> Scale -> List Value
 getLastGetTickValues axisConfigs =
     List.head axisConfigs
-        |> Maybe.withDefault AxisInternal.defaultConfigX
-        |> .tickValues
+        |> Maybe.withDefault defaultAxisConfig
+        |> .tick
+        |> .values
         |> AxisInternal.getValues
 
 
@@ -757,6 +759,6 @@ getYValue xValue ( x, y ) result =
         result
 
 
-getAxisCrossings : List (AxisInternal.Config msg) -> Scale -> List Value
+getAxisCrossings : List (Axis msg) -> Scale -> List Value
 getAxisCrossings axisConfigs oppositeScale =
     List.map (AxisInternal.getAxisPosition oppositeScale << .position) axisConfigs

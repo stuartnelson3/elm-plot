@@ -54,7 +54,7 @@ view =
             ]
             data2
         , xAxis
-            [ Axis.line
+            [ Attributes.lineStyle
                 [ Attributes.stroke axisColor ]
             , Axis.tickDelta 1
             ]
@@ -82,7 +82,7 @@ code =
                 ]
                 data2
             , xAxis
-                [ Axis.line
+                [ Attributes.lineStyle
                     [ Style.stroke axisColor ]
                 , Axis.tickDelta 1
                 ]

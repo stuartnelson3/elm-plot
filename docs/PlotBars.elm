@@ -4,7 +4,7 @@ import Svg
 import Plot exposing (..)
 import Plot.Bars as Bars
 import Plot.Axis as Axis
-import Plot.Attributes as Attributes
+import Plot.Attributes as Attributes exposing (..)
 import Plot.Label as Label
 import Common exposing (..)
 
@@ -28,11 +28,6 @@ id =
     "PlotBars"
 
 
-formatter : Bars.LabelInfo -> String
-formatter { index, xValue, yValue } =
-    toString index ++ ": (" ++ toString xValue ++ ", " ++ toString yValue ++ ")"
-
-
 view : Svg.Svg a
 view =
     plot
@@ -41,19 +36,19 @@ view =
         , padding ( 0, 20 )
         ]
         [ bars
-            [ Bars.maxBarWidth 30
-            , Bars.stackByY
-            , Bars.label
-                [ Label.formatFromList [ "A", "B", "C" ]
-                , Label.view
-                    [ Label.displace ( 0, 13 )
-                    , Label.fontSize 10
+            [ maxBarWidth 30
+            , stackByY
+            , label
+                [ format (FormatFromList [ "A", "B", "C" ])
+                , viewStatic
+                    [ displace ( 0, 13 )
+                    , fontSize 10
                     ]
                 ]
             ]
-            [ [ Bars.fill Common.blueFill ]
-            , [ Bars.fill Common.skinFill ]
-            , [ Bars.fill Common.pinkFill ]
+            [ [ fill Common.blueFill ]
+            , [ fill Common.skinFill ]
+            , [ fill Common.pinkFill ]
             ]
             (Bars.toBarData
                 { yValues = .values
@@ -66,8 +61,8 @@ view =
                 ]
             )
         , xAxis
-            [ Axis.line [ Attributes.stroke Common.axisColor ]
-            , Axis.tickDelta 1
+            [ Attributes.lineStyle [ Attributes.stroke Common.axisColor ]
+            , tick [ values (ValuesFromDelta 1) ]
             ]
         ]
 
@@ -83,21 +78,21 @@ code =
             , padding ( 0, 20 )
             ]
             [ bars
-                [ Bars.maxBarWidth 30
-                , Bars.stackByY
-                , Bars.label
-                    [ Label.formatFromList [ "A", "B", "C" ]
-                    , Label.view
-                        [ Label.displace ( 0, 13 )
-                        , Label.fontSize 10
+                [ maxBarWidth 30
+                , stackByY
+                , label
+                    [ formatFromList [ "A", "B", "C" ]
+                    , view
+                        [ displace ( 0, 13 )
+                        , fontSize 10
                         ]
                     ]
                 ]
-                [ [ Bars.fill Common.blueFill ]
-                , [ Bars.fill Common.skinFill ]
-                , [ Bars.fill Common.pinkFill ]
+                [ [ fill Common.blueFill ]
+                , [ fill Common.skinFill ]
+                , [ fill Common.pinkFill ]
                 ]
-                (Bars.toBarData
+                (toBarData
                     { yValues = .values
                     , xValue = Nothing
                     }
@@ -108,7 +103,7 @@ code =
                     ]
                 )
             , xAxis
-                [ Axis.line [ Attributes.stroke Common.axisColor ]
+                [ Attributes.lineStyle [ Attributes.stroke Common.axisColor ]
                 , Axis.tickDelta 1
                 ]
             ]

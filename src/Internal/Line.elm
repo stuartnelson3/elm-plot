@@ -3,36 +3,18 @@ module Internal.Line exposing (..)
 import Svg
 import Svg.Attributes
 import Plot.Types exposing (..)
+import Plot.Attributes exposing (..)
 import Internal.Types exposing (..)
 import Internal.Draw exposing (..)
 
 
-type alias Config a =
-    { stroke : String
-    , strokeWidth : Int
-    , opacity : Float
-    , smoothing : Smoothing
-    , customAttrs : List (Svg.Attribute a)
-    }
-
-
-defaultConfig : Config a
-defaultConfig =
-    { stroke = "black"
-    , strokeWidth = 1
-    , opacity = 1
-    , smoothing = None
-    , customAttrs = []
-    }
-
-
-view : Meta -> Config a -> List Point -> Svg.Svg a
+view : Meta -> LineStyle msg -> List Point -> Svg.Svg msg
 view meta config points =
     let
         instructions =
             case points of
                 p1 :: rest ->
-                    M p1 :: (toLinePath config.smoothing (p1 :: rest)) |> toPath meta
+                    M p1 :: (toLinePath config.interpolation (p1 :: rest)) |> toPath meta
 
                 _ ->
                     ""

@@ -3,8 +3,7 @@ module PlotScatter exposing (plotExample)
 import Svg
 import Plot exposing (..)
 import Plot.Scatter as Scatter
-import Plot.Axis as Axis
-import Plot.Attributes as Attributes
+import Plot.Attributes as Attributes exposing (..)
 import Common exposing (..)
 
 
@@ -40,15 +39,15 @@ view =
         , domainLowest (min 0)
         ]
         [ scatter
-            [ Scatter.stroke pinkStroke
-            , Scatter.fill pinkFill
-            , Scatter.radius 8
+            [ stroke pinkStroke
+            , fill pinkFill
+            , radius 8
             ]
             data
         , xAxis
-            [ Axis.line
-                [ Attributes.stroke axisColor ]
-            , Axis.tickDelta 2
+            [ lineStyle
+                [ stroke axisColor ]
+            , tick [ values (ValuesFromDelta 2) ]
             ]
         ]
 
@@ -64,13 +63,13 @@ code =
             , domainLowest (min 0)
             ]
             [ scatter
-                [ Scatter.stroke pinkStroke
-                , Scatter.fill pinkFill
-                , Scatter.radius 8
+                [ stroke pinkStroke
+                , fill pinkFill
+                , radius 8
                 ]
                 data
             , xAxis
-                [ Axis.line
+                [ lineStyle
                     [ Style.stroke axisColor ]
                 , Axis.tickDelta 2
                 ]

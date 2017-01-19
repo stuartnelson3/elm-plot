@@ -2,8 +2,7 @@ module PlotHint exposing (plotExample)
 
 import Svg
 import Plot exposing (..)
-import Plot.Attributes as Attributes
-import Plot.Axis as Axis
+import Plot.Attributes as Attributes exposing (..)
 import Plot.Bars as Bars
 import Plot.Hint as Hint
 import Common exposing (..)
@@ -45,10 +44,10 @@ view state =
         , margin ( 10, 20, 40, 40 )
         ]
         [ bars
-            [ Bars.maxBarWidthPer 85 ]
-            [ [ Bars.fill Common.blueFill ]
-            , [ Bars.fill Common.skinFill ]
-            , [ Bars.fill Common.pinkFill ]
+            [ maxBarWidthPer 85 ]
+            [ [ fill Common.blueFill ]
+            , [ fill Common.skinFill ]
+            , [ fill Common.pinkFill ]
             ]
             (Bars.toBarData
                 { yValues = .values
@@ -61,8 +60,8 @@ view state =
                 ]
             )
         , xAxis
-            [ Axis.line [ Attributes.stroke axisColor ]
-            , Axis.tickDelta 1
+            [ lineStyle [ stroke axisColor ]
+            , tick [ values (ValuesFromDelta 1) ]
             ]
         , hint
             [ Hint.lineStyle [ ( "background", "#b9b9b9" ) ] ]
@@ -80,12 +79,12 @@ code =
             , margin ( 10, 20, 40, 40 )
             ]
             [ bars
-                [ Bars.maxBarWidthPer 85 ]
-                [ [ Bars.fill Common.blueFill ]
-                , [ Bars.fill Common.skinFill ]
-                , [ Bars.fill Common.pinkFill ]
+                [ maxBarWidthPer 85 ]
+                [ [ fill Common.blueFill ]
+                , [ fill Common.skinFill ]
+                , [ fill Common.pinkFill ]
                 ]
-                (Bars.toBarData
+                (toBarData
                     { yValues = .values
                     , xValue = Nothing
                     }
@@ -96,7 +95,7 @@ code =
                     ]
                 )
             , xAxis
-                [ Axis.line [ Style.stroke axisColor ]
+                [ lineStyle [ Style.stroke axisColor ]
                 , Axis.tickDelta 1
                 ]
             , hint
