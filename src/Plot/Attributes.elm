@@ -55,12 +55,15 @@ module Plot.Attributes
         , stackByY
         , maxBarWidth
         , fontSize
+        , Hint
+        , defaultHintConfig
         )
 
 {-| Attributes to alter styling.
 -}
 
 import Svg
+import Html
 import Plot.Types exposing (..)
 import Internal.Types exposing (..)
 import Internal.Types exposing (Orientation(..))
@@ -161,8 +164,37 @@ radius radius config =
     { config | radius = radius }
 
 
+{-| Set HTML view. (Like for the hint)
+-}
+viewHtml : (a -> Html.Html msg) -> Attribute { c | view : a -> Html.Html msg }
+viewHtml view config =
+    { config | view = view }
+
+
 
 -- Highlevel attributes
+
+
+{-| The available info provided to your hint view.
+-}
+type alias HintInfo =
+    { xValue : Float
+    , yValues : List (Maybe (List Value))
+    , isLeftSide : Bool
+    }
+
+
+type alias Hint msg =
+    { view : Maybe (HintInfo -> Html.Html msg)
+    , lineStyle : LineStyle msg
+    }
+
+
+defaultHintConfig : Hint msg
+defaultHintConfig =
+    { view = Nothing
+    , lineStyle = defaultLineStyle
+    }
 
 
 type alias Scatter a =

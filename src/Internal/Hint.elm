@@ -5,32 +5,26 @@ import Internal.Types exposing (Orientation(..), Scale, Meta)
 import Internal.Draw exposing (..)
 import Html
 import Html.Attributes
+import Plot.Attributes exposing (..)
 
 
-type alias Config msg =
-    { view : HintInfo -> Bool -> Html.Html msg
-    , lineStyle : Style
-    }
-
-
-defaultConfig : Config msg
-defaultConfig =
-    { view = defaultView
-    , lineStyle = []
-    }
-
-
-view : Meta -> Config msg -> ( Float, Float ) -> Html.Html msg
+view : Meta -> Hint msg -> ( Float, Float ) -> Html.Html msg
 view { toSvgCoords, scale, getHintInfo } { lineStyle, view } position =
     let
         info =
             getHintInfo (Tuple.first position)
+
+        viewHint =
+            Maybe.withDefault defaultView view
 
         ( xSvg, ySvg ) =
             toSvgCoords ( info.xValue, 0 )
 
         isLeftSide =
             xSvg - scale.x.offset.lower < scale.x.length / 2
+
+        infoWithPosition =
+            { info | isLeftSide = isLeftSide }
 
         lineView =
             [ viewLine lineStyle scale.y.length ]
@@ -43,7 +37,7 @@ view { toSvgCoords, scale, getHintInfo } { lineStyle, view } position =
                 , ( "position", "absolute" )
                 ]
             ]
-            ((view info isLeftSide) :: lineView)
+            ((view info) :: lineView)
 
 
 viewLine : Style -> Float -> Html.Html msg
@@ -55,8 +49,8 @@ viewLine style length =
         []
 
 
-defaultView : HintInfo -> Bool -> Html.Html msg
-defaultView { xValue, yValues } isLeftSide =
+defaultView : HintInfo -> Html.Html msg
+defaultView { xValue, yValues, isLeftSide } =
     let
         classes =
             [ ( "elm-plot__hint__default-view", True )

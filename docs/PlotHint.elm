@@ -4,7 +4,6 @@ import Svg
 import Plot exposing (..)
 import Plot.Attributes as Attributes exposing (..)
 import Plot.Bars as Bars
-import Plot.Hint as Hint
 import Common exposing (..)
 
 

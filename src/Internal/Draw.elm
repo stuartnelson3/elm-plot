@@ -1,7 +1,6 @@
 module Internal.Draw
     exposing
-        ( fullLine
-        , positionAttributes
+        ( positionAttributes
         , PathType(..)
         , toPath
         , classAttribute
@@ -26,21 +25,6 @@ import Plot.Attributes exposing (InterpolationOption(..))
 
 
 {- Common drawing functions. -}
-
-
-fullLine : List (Attribute a) -> Meta -> Float -> Svg a
-fullLine attributes { toSvgCoords, scale } value =
-    let
-        { lowest, highest } =
-            scale.x
-
-        begin =
-            toSvgCoords ( lowest, value )
-
-        end =
-            toSvgCoords ( highest, value )
-    in
-        Svg.line (positionAttributes begin end ++ attributes) []
 
 
 positionAttributes : ( Float, Float ) -> ( Float, Float ) -> List (Attribute a)

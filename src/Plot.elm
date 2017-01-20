@@ -69,7 +69,6 @@ import Svg.Lazy
 import Json.Decode as Json
 import DOM
 import Plot.Bars as Bars
-import Plot.Hint as Hint
 import Plot.Types exposing (..)
 import Internal.Grid as GridInternal
 import Internal.Axis as AxisInternal
@@ -687,9 +686,12 @@ getFlippedMeta orientation meta =
             flipMeta meta
 
 
-getHintInfo : List (Element msg) -> Float -> Hint.HintInfo
+getHintInfo : List (Element msg) -> Float -> HintInfo
 getHintInfo elements xValue =
-    Hint.HintInfo xValue <| List.foldr (collectYValues xValue) [] elements
+    { xValue = xValue
+    , yValues = List.foldr (collectYValues xValue) [] elements
+    , isLeftSide = True
+    }
 
 
 toAxisConfigsOriented : List (Element msg) -> Oriented (List (Axis msg))

@@ -9901,25 +9901,6 @@ var _terezka$elm_plot$Internal_Draw$positionAttributes = F2(
 			}
 		};
 	});
-var _terezka$elm_plot$Internal_Draw$fullLine = F3(
-	function (attributes, _p24, value) {
-		var _p25 = _p24;
-		var _p27 = _p25.toSvgCoords;
-		var _p26 = _p25.scale.x;
-		var lowest = _p26.lowest;
-		var highest = _p26.highest;
-		var begin = _p27(
-			{ctor: '_Tuple2', _0: lowest, _1: value});
-		var end = _p27(
-			{ctor: '_Tuple2', _0: highest, _1: value});
-		return A2(
-			_elm_lang$svg$Svg$line,
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				A2(_terezka$elm_plot$Internal_Draw$positionAttributes, begin, end),
-				attributes),
-			{ctor: '[]'});
-	});
 var _terezka$elm_plot$Internal_Draw$Z = {ctor: 'Z'};
 var _terezka$elm_plot$Internal_Draw$S = F3(
 	function (a, b, c) {
@@ -9929,51 +9910,51 @@ var _terezka$elm_plot$Internal_Draw$toSPathTypes = F2(
 	function (result, points) {
 		toSPathTypes:
 		while (true) {
-			var _p28 = points;
-			if ((_p28.ctor === '::') && (_p28._1.ctor === '::')) {
-				if (_p28._1._1.ctor === '[]') {
-					var _p29 = _p28._1._0;
+			var _p24 = points;
+			if ((_p24.ctor === '::') && (_p24._1.ctor === '::')) {
+				if (_p24._1._1.ctor === '[]') {
+					var _p25 = _p24._1._0;
 					return {
 						ctor: '::',
-						_0: A3(_terezka$elm_plot$Internal_Draw$S, _p28._0, _p29, _p29),
+						_0: A3(_terezka$elm_plot$Internal_Draw$S, _p24._0, _p25, _p25),
 						_1: result
 					};
 				} else {
-					if (_p28._1._1._1.ctor === '[]') {
-						var _p31 = _p28._1._1._0;
-						var _p30 = _p28._1._0;
-						var _v12 = {
+					if (_p24._1._1._1.ctor === '[]') {
+						var _p27 = _p24._1._1._0;
+						var _p26 = _p24._1._0;
+						var _v11 = {
 							ctor: '::',
-							_0: A3(_terezka$elm_plot$Internal_Draw$S, _p28._0, _p30, _p31),
+							_0: A3(_terezka$elm_plot$Internal_Draw$S, _p24._0, _p26, _p27),
 							_1: result
 						},
-							_v13 = {
+							_v12 = {
 							ctor: '::',
-							_0: _p30,
+							_0: _p26,
 							_1: {
 								ctor: '::',
-								_0: _p31,
+								_0: _p27,
 								_1: {ctor: '[]'}
 							}
 						};
-						result = _v12;
-						points = _v13;
+						result = _v11;
+						points = _v12;
 						continue toSPathTypes;
 					} else {
-						var _p33 = _p28._1._1._0;
-						var _p32 = _p28._1._0;
-						var _v14 = {
+						var _p29 = _p24._1._1._0;
+						var _p28 = _p24._1._0;
+						var _v13 = {
 							ctor: '::',
-							_0: A3(_terezka$elm_plot$Internal_Draw$S, _p28._0, _p32, _p33),
+							_0: A3(_terezka$elm_plot$Internal_Draw$S, _p24._0, _p28, _p29),
 							_1: result
 						},
-							_v15 = {
+							_v14 = {
 							ctor: '::',
-							_0: _p32,
-							_1: {ctor: '::', _0: _p33, _1: _p28._1._1._1}
+							_0: _p28,
+							_1: {ctor: '::', _0: _p29, _1: _p24._1._1._1}
 						};
-						result = _v14;
-						points = _v15;
+						result = _v13;
+						points = _v14;
 						continue toSPathTypes;
 					}
 				}
@@ -9989,16 +9970,16 @@ var _terezka$elm_plot$Internal_Draw$L = function (a) {
 	return {ctor: 'L', _0: a};
 };
 var _terezka$elm_plot$Internal_Draw$toLinePath = function (interpolation) {
-	var _p34 = interpolation;
-	if (_p34.ctor === 'NoInterpolation') {
+	var _p30 = interpolation;
+	if (_p30.ctor === 'NoInterpolation') {
 		return _elm_lang$core$List$map(_terezka$elm_plot$Internal_Draw$L);
 	} else {
-		return function (_p35) {
+		return function (_p31) {
 			return _elm_lang$core$List$reverse(
 				A2(
 					_terezka$elm_plot$Internal_Draw$toSPathTypes,
 					{ctor: '[]'},
-					_p35));
+					_p31));
 		};
 	}
 };

@@ -3,7 +3,6 @@ module PlotComposed exposing (view, code, id)
 import Svg
 import Plot exposing (..)
 import Plot.Attributes as Attributes exposing (..)
-import Plot.Hint as Hint
 import Common exposing (..)
 
 
