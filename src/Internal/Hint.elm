@@ -1,52 +1,55 @@
 module Internal.Hint exposing (..)
 
-import Plot.Types exposing (..)
-import Internal.Types exposing (Orientation(..), Scale, Meta)
+import Svg
+import Internal.Types exposing (Scale, Meta)
 import Internal.Draw exposing (..)
+import Internal.Line as Line
 import Html
 import Html.Attributes
+import Plot.Attributes exposing (Orientation(..))
 import Plot.Attributes exposing (..)
 
 
-view : Meta -> Hint msg -> ( Float, Float ) -> Html.Html msg
-view { toSvgCoords, scale, getHintInfo } { lineStyle, view } position =
+view : Meta -> Hint msg -> ( Float, Float ) -> ( Svg.Svg msg, Html.Html msg )
+view meta { lineStyle, view } position =
     let
+        xPosition =
+            Tuple.first position
+
         info =
-            getHintInfo (Tuple.first position)
+            meta.getHintInfo xPosition
 
         viewHint =
             Maybe.withDefault defaultView view
 
         ( xSvg, ySvg ) =
-            toSvgCoords ( info.xValue, 0 )
+            meta.toSvgCoords ( info.xValue, 0 )
 
         isLeftSide =
-            xSvg - scale.x.offset.lower < scale.x.length / 2
+            xSvg - meta.scale.x.offset.lower < meta.scale.x.length / 2
 
         infoWithPosition =
             { info | isLeftSide = isLeftSide }
 
         lineView =
-            [ viewLine lineStyle scale.y.length ]
+            Line.view meta
+                lineStyle
+                [ ( xPosition, meta.scale.y.highest )
+                , ( xPosition, meta.scale.y.lowest )
+                ]
     in
-        Html.div
+        ( lineView
+        , Html.div
             [ Html.Attributes.class "elm-plot__hint"
             , Html.Attributes.style
                 [ ( "left", toPixels xSvg )
-                , ( "top", toPixels scale.y.offset.lower )
+                , ( "top", toPixels meta.scale.y.offset.lower )
                 , ( "position", "absolute" )
+                , ( "height", "100%" )
                 ]
             ]
-            ((view info) :: lineView)
-
-
-viewLine : Style -> Float -> Html.Html msg
-viewLine style length =
-    Html.div
-        [ Html.Attributes.class "elm-plot__hint__line"
-        , Html.Attributes.style <| [ ( "height", toPixels length ) ] ++ style
-        ]
-        []
+            [ viewHint infoWithPosition ]
+        )
 
 
 defaultView : HintInfo -> Html.Html msg

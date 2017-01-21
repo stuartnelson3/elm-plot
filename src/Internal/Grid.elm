@@ -1,7 +1,6 @@
 module Internal.Grid exposing (..)
 
 import Svg
-import Plot.Types exposing (..)
 import Plot.Attributes exposing (..)
 import Internal.Types exposing (..)
 import Internal.Draw as Draw exposing (..)

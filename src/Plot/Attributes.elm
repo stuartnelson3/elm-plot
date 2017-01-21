@@ -57,6 +57,11 @@ module Plot.Attributes
         , fontSize
         , Hint
         , defaultHintConfig
+        , HintInfo
+        , Point
+        , Value
+        , Style
+        , Orientation(..)
         )
 
 {-| Attributes to alter styling.
@@ -64,15 +69,35 @@ module Plot.Attributes
 
 import Svg
 import Html
-import Plot.Types exposing (..)
-import Internal.Types exposing (..)
-import Internal.Types exposing (Orientation(..))
 import Internal.View as View
 
 
 {-| -}
 type alias Attribute a =
     a -> a
+
+
+{-| -}
+type alias Value =
+    Float
+
+
+{-| Convenience type to represent coordinates.
+-}
+type alias Point =
+    ( Float, Float )
+
+
+{-| Convenience type to represent style.
+-}
+type alias Style =
+    List ( String, String )
+
+
+{-| -}
+type Orientation
+    = X
+    | Y
 
 
 {-| Set the stroke color.

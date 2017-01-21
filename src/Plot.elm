@@ -15,6 +15,7 @@ module Plot
         , classes
         , margin
         , padding
+        , id
         , size
         , style
         , domainLowest
@@ -50,7 +51,7 @@ module Plot
 @docs scatter, line, area, bars
 
 # Styling and sizes
-@docs classes, margin, padding, size, style, domainLowest, domainHighest, rangeLowest, rangeHighest
+@docs id, classes, margin, padding, size, style, domainLowest, domainHighest, rangeLowest, rangeHighest
 
 # State
 For an example of the update flow see [this example](https://github.com/terezka/elm-plot/blob/master/examples/Interactive.elm).
@@ -69,7 +70,6 @@ import Svg.Lazy
 import Json.Decode as Json
 import DOM
 import Plot.Bars as Bars
-import Plot.Types exposing (..)
 import Internal.Grid as GridInternal
 import Internal.Axis as AxisInternal
 import Internal.Bars as BarsInternal
@@ -91,7 +91,7 @@ type Element msg
     | Area (AreaStyle msg) (List Point)
     | Bars (Bars msg) (List (BarsStyle msg)) (List Bars.Data)
     | Scatter (Scatter msg) (List Point)
-    | Hint (HintInternal.Config msg) (Maybe Point)
+    | Hint (Hint msg) (Maybe Point)
     | Axis (Axis msg)
     | Grid (Grid msg)
     | CustomElement ((Point -> Point) -> Svg.Svg msg)
@@ -279,9 +279,9 @@ bars attrs styleAttrsList groups =
 
  Remember to use `plotInteractive` for the events to be processed!.
 -}
-hint : List (Hint.Attribute msg) -> Maybe Point -> Element msg
+hint : List (Attribute (Hint msg)) -> Maybe Point -> Element msg
 hint attrs position =
-    Hint (List.foldr (<|) HintInternal.defaultConfig attrs) position
+    Hint (List.foldr (<|) defaultHintConfig attrs) position
 
 
 {-| This element is passed a function which can translate your values into
@@ -544,7 +544,11 @@ viewElement meta element ( svgViews, htmlViews ) =
         Hint config position ->
             case position of
                 Just point ->
-                    ( svgViews, (HintInternal.view meta config point) :: htmlViews )
+                    let
+                        ( line, hint ) =
+                            HintInternal.view meta config point
+                    in
+                        ( line :: svgViews, hint :: htmlViews )
 
                 Nothing ->
                     ( svgViews, htmlViews )

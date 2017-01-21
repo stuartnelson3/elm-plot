@@ -3,10 +3,9 @@ module Internal.Area exposing (..)
 import Svg
 import Svg.Attributes
 import Internal.Types exposing (..)
-import Plot.Types exposing (..)
 import Internal.Stuff exposing (getEdgesX)
 import Internal.Draw exposing (PathType(..), toPath, toLinePath, toStyle, toClipPathId)
-import Plot.Attributes exposing (AreaStyle, InterpolationOption(..))
+import Plot.Attributes exposing (AreaStyle, InterpolationOption(..), Point)
 
 
 view : Meta -> AreaStyle a -> List Point -> Svg.Svg a

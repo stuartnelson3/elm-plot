@@ -8,8 +8,8 @@ module Internal.Bars
 import Svg
 import Svg.Attributes
 import Plot.Attributes as Attributes exposing (..)
-import Plot.Types exposing (Style, Point, Value)
-import Internal.Types exposing (Orientation(..), MaxWidth(..), Meta, Edges, Oriented, Scale)
+import Plot.Attributes as Attributes exposing (Orientation(..), MaxWidth(..))
+import Internal.Types exposing (Meta, Edges, Oriented, Scale)
 import Internal.Draw exposing (..)
 import Internal.Stuff exposing (..)
 import Internal.Label as Label

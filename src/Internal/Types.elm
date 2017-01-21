@@ -1,42 +1,13 @@
 module Internal.Types
     exposing
-        ( Orientation(..)
-        , Scale
+        ( Scale
         , Meta
-        , Anchor(..)
         , Oriented
         , Edges
-        , MaxWidth(..)
         , EdgesAny
-        , IndexedInfo
-        , Smoothing(..)
         )
 
-import Plot.Types exposing (..)
-
-
-type alias IndexedInfo a =
-    { a | index : Int, value : Float }
-
-
-type Orientation
-    = X
-    | Y
-
-
-type Smoothing
-    = None
-    | Bezier
-
-
-type Anchor
-    = Inner
-    | Outer
-
-
-type MaxWidth
-    = Fixed Int
-    | Percentage Int
+import Plot.Attributes exposing (..)
 
 
 type alias Edges =

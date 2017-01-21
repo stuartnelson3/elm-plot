@@ -41,7 +41,6 @@ module Plot.Bars
 
 -}
 
-import Plot.Types exposing (Style, Point, Value)
 import Plot.Attributes as Attributes exposing (..)
 
 

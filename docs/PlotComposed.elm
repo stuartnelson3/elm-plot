@@ -56,6 +56,7 @@ view state =
         [ size ( 800, 400 )
         , padding ( 40, 40 )
         , margin ( 15, 20, 40, 15 )
+        , Plot.id "ComposedPlot"
         ]
         [ horizontalGrid
             [ lineStyle [ stroke "#f2f2f2" ] ]
@@ -133,7 +134,7 @@ view state =
                 ]
             ]
         , hint
-            [ Hint.lineStyle [ ( "background", "#b9b9b9" ) ] ]
+            [ lineStyle [ stroke "#b9b9b9" ] ]
             (getHoveredValue state)
         ]
 

@@ -63,7 +63,7 @@ view state =
             , tick [ values (ValuesFromDelta 1) ]
             ]
         , hint
-            [ Hint.lineStyle [ ( "background", "#b9b9b9" ) ] ]
+            [ lineStyle [ stroke "#b9b9b9" ] ]
             (getHoveredValue state)
         ]
 

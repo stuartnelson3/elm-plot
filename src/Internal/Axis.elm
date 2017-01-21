@@ -6,14 +6,13 @@ module Internal.Axis
         , getDelta
         )
 
-import Plot.Types exposing (..)
-import Internal.Types exposing (Orientation(..), Scale, Meta, IndexedInfo)
+import Internal.Types exposing (Scale, Meta)
 import Internal.Tick as Tick
 import Internal.Label as Label
 import Internal.Line as Line
 import Internal.Draw as Draw exposing (..)
 import Internal.Stuff exposing (..)
-import Plot.Attributes as Attributes exposing (Axis, AxisLabelInfo, AnchorOption(..), PositionOption(..), ValuesOption(..))
+import Plot.Attributes as Attributes exposing (Point, Value, Orientation(..), Axis, AxisLabelInfo, AnchorOption(..), PositionOption(..), ValuesOption(..))
 import Svg
 import Svg.Attributes
 import Round

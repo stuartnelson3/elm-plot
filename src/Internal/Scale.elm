@@ -1,8 +1,8 @@
 module Internal.Scale exposing (..)
 
-import Plot.Types exposing (..)
 import Internal.Types exposing (..)
 import Internal.Stuff exposing (..)
+import Plot.Attributes exposing (..)
 
 
 getScale : Float -> EdgesAny (Float -> Float) -> Maybe Edges -> Edges -> ( Value, Value ) -> List Value -> Scale

@@ -1,7 +1,8 @@
 module Internal.Tick exposing (toView)
 
+import Plot.Attributes as Attributes exposing (Orientation(..))
 import Plot.Attributes as Attributes exposing (..)
-import Internal.Types exposing (Orientation(..), Scale, Meta, IndexedInfo)
+import Internal.Types exposing (Scale, Meta)
 import Internal.Draw as Draw exposing (..)
 import Internal.View as View
 import Svg
