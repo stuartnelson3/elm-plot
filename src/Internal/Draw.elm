@@ -18,9 +18,8 @@ module Internal.Draw
 
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes
-import Internal.Types exposing (Meta)
-import Internal.Stuff exposing (..)
-import Plot.Attributes exposing (Orientation, Point, InterpolationOption(..))
+import Internal.Scale exposing (..)
+import Plot.Attributes exposing (Plot, Orientation(..), Point, InterpolationOption(..))
 
 
 {- Common drawing functions. -}
@@ -45,9 +44,12 @@ classAttribute base classes =
 
 classAttributeOriented : String -> Orientation -> List String -> Attribute a
 classAttributeOriented base orientation classes =
-    ((?) orientation (classBase base ++ "--x") (classBase base ++ "--y"))
-        :: classes
-        |> classAttribute base
+    case orientation of
+        X ->
+            (classBase base ++ "--x") :: classes |> classAttribute base
+
+        Y ->
+            (classBase base ++ "--y") :: classes |> classAttribute base
 
 
 classBase : String -> String
@@ -66,39 +68,39 @@ type PathType
     | Z
 
 
-toPath : Meta -> List PathType -> String
-toPath meta pathParts =
-    List.foldl (\part result -> result ++ toPathTypeString meta part) "" pathParts
+toPath : Plot -> List PathType -> String
+toPath plot pathParts =
+    List.foldl (\part result -> result ++ toPathTypeString plot part) "" pathParts
 
 
-toPathTypeString : Meta -> PathType -> String
-toPathTypeString meta pathType =
+toPathTypeString : Plot -> PathType -> String
+toPathTypeString plot pathType =
     case pathType of
         M point ->
-            toPathTypeStringSinglePoint meta "M" point
+            toPathTypeStringSinglePoint plot "M" point
 
         L point ->
-            toPathTypeStringSinglePoint meta "L" point
+            toPathTypeStringSinglePoint plot "L" point
 
         S p1 p2 p3 ->
-            toPathTypeStringS meta p1 p2 p3
+            toPathTypeStringS plot p1 p2 p3
 
         Z ->
             "Z"
 
 
-toPathTypeStringSinglePoint : Meta -> String -> Point -> String
-toPathTypeStringSinglePoint meta typeString point =
-    typeString ++ " " ++ pointToString meta point
+toPathTypeStringSinglePoint : Plot -> String -> Point -> String
+toPathTypeStringSinglePoint plot typeString point =
+    typeString ++ " " ++ pointToString plot point
 
 
-toPathTypeStringS : Meta -> Point -> Point -> Point -> String
-toPathTypeStringS meta p1 p2 p3 =
+toPathTypeStringS : Plot -> Point -> Point -> Point -> String
+toPathTypeStringS plot p1 p2 p3 =
     let
         ( point1, point2 ) =
             toBezierPoints p1 p2 p3
     in
-        "S" ++ " " ++ pointToString meta point1 ++ "," ++ pointToString meta point2
+        "S" ++ " " ++ pointToString plot point1 ++ "," ++ pointToString plot point2
 
 
 magnitude : Float
@@ -113,11 +115,11 @@ toBezierPoints ( x0, y0 ) ( x, y ) ( x1, y1 ) =
     )
 
 
-pointToString : Meta -> Point -> String
-pointToString meta point =
+pointToString : Plot -> Point -> String
+pointToString plot point =
     let
         ( x, y ) =
-            meta.toSvgCoords point
+            toSvgCoords plot point
     in
         (toString x) ++ "," ++ (toString y)
 
@@ -152,9 +154,9 @@ toSPathTypes result points =
 -- Utils
 
 
-toClipPathId : Meta -> String
-toClipPathId meta =
-    meta.id ++ "__scale-clip-path"
+toClipPathId : Plot -> String
+toClipPathId plot =
+    plot.id ++ "__scale-clip-path"
 
 
 toTranslate : ( Float, Float ) -> String

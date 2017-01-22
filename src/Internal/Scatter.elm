@@ -2,17 +2,15 @@ module Internal.Scatter exposing (..)
 
 import Svg
 import Svg.Attributes
-
-import Internal.Types exposing (..)
-import Internal.Draw exposing (..)
+import Internal.Scale exposing (..)
 import Plot.Attributes exposing (..)
 
 
-view : Meta -> Scatter a -> List Point -> Svg.Svg a
-view meta { fill, stroke, radius } points =
+view : Plot -> Scatter a -> List Point -> Svg.Svg a
+view plot { fill, stroke, radius } points =
     let
         svgPoints =
-            List.map meta.toSvgCoords points
+            List.map (toSvgCoords plot) points
     in
         Svg.g
             [ Svg.Attributes.fill fill

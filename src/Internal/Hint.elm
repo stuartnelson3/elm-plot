@@ -1,7 +1,7 @@
 module Internal.Hint exposing (..)
 
 import Svg
-import Internal.Types exposing (Scale, Meta)
+import Internal.Scale exposing (..)
 import Internal.Draw exposing (..)
 import Internal.Line as Line
 import Html
@@ -10,32 +10,32 @@ import Plot.Attributes exposing (Orientation(..))
 import Plot.Attributes exposing (..)
 
 
-view : Meta -> Hint msg -> ( Float, Float ) -> ( Svg.Svg msg, Html.Html msg )
-view meta { lineStyle, view } position =
+view : Plot -> Hint msg -> ( Float, Float ) -> ( Svg.Svg msg, Html.Html msg )
+view plot { lineStyle, view } position =
     let
         xPosition =
             Tuple.first position
 
         info =
-            meta.getHintInfo xPosition
+            plot.getHintInfo xPosition
 
         viewHint =
             Maybe.withDefault defaultView view
 
         ( xSvg, ySvg ) =
-            meta.toSvgCoords ( info.xValue, 0 )
+            toSvgCoords plot ( info.xValue, 0 )
 
         isLeftSide =
-            xSvg - meta.scale.x.offset.lower < meta.scale.x.length / 2
+            xSvg - plot.scales.x.offset.lower < plot.scales.x.length / 2
 
         infoWithPosition =
             { info | isLeftSide = isLeftSide }
 
         lineView =
-            Line.view meta
+            Line.view plot
                 lineStyle
-                [ ( xPosition, meta.scale.y.highest )
-                , ( xPosition, meta.scale.y.lowest )
+                [ ( xPosition, plot.scales.y.bounds.upper )
+                , ( xPosition, plot.scales.y.bounds.lower )
                 ]
     in
         ( lineView
@@ -43,7 +43,7 @@ view meta { lineStyle, view } position =
             [ Html.Attributes.class "elm-plot__hint"
             , Html.Attributes.style
                 [ ( "left", toPixels xSvg )
-                , ( "top", toPixels meta.scale.y.offset.lower )
+                , ( "top", toPixels plot.scales.y.offset.lower )
                 , ( "position", "absolute" )
                 , ( "height", "100%" )
                 ]

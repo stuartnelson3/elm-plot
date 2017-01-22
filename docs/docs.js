@@ -9320,7 +9320,7 @@ var _terezka$elm_plot$Plot_Attributes$Bars = F3(
 	function (a, b, c) {
 		return {stackBy: a, label: b, maxWidth: c};
 	});
-var _terezka$elm_plot$Plot_Attributes$AreaStyle = F6(
+var _terezka$elm_plot$Plot_Attributes$Area = F6(
 	function (a, b, c, d, e, f) {
 		return {stroke: a, strokeWidth: b, fill: c, opacity: d, interpolation: e, customAttrs: f};
 	});
@@ -9328,7 +9328,7 @@ var _terezka$elm_plot$Plot_Attributes$Grid = F5(
 	function (a, b, c, d, e) {
 		return {values: a, lineStyle: b, classes: c, orientation: d, customAttrs: e};
 	});
-var _terezka$elm_plot$Plot_Attributes$LineStyle = F5(
+var _terezka$elm_plot$Plot_Attributes$Line = F5(
 	function (a, b, c, d, e) {
 		return {stroke: a, strokeWidth: b, opacity: c, interpolation: d, customAttrs: e};
 	});
@@ -9352,7 +9352,7 @@ var _terezka$elm_plot$Plot_Attributes$stackByY = function (config) {
 };
 var _terezka$elm_plot$Plot_Attributes$X = {ctor: 'X'};
 var _terezka$elm_plot$Plot_Attributes$NoInterpolation = {ctor: 'NoInterpolation'};
-var _terezka$elm_plot$Plot_Attributes$defaultAreaStyle = {
+var _terezka$elm_plot$Plot_Attributes$defaultArea = {
 	stroke: 'black',
 	strokeWidth: 1,
 	fill: 'grey',
@@ -9360,14 +9360,14 @@ var _terezka$elm_plot$Plot_Attributes$defaultAreaStyle = {
 	interpolation: _terezka$elm_plot$Plot_Attributes$NoInterpolation,
 	customAttrs: {ctor: '[]'}
 };
-var _terezka$elm_plot$Plot_Attributes$defaultLineStyle = {
+var _terezka$elm_plot$Plot_Attributes$defaultLine = {
 	stroke: 'black',
 	strokeWidth: 1,
 	opacity: 1,
 	interpolation: _terezka$elm_plot$Plot_Attributes$NoInterpolation,
 	customAttrs: {ctor: '[]'}
 };
-var _terezka$elm_plot$Plot_Attributes$defaultHintConfig = {view: _elm_lang$core$Maybe$Nothing, lineStyle: _terezka$elm_plot$Plot_Attributes$defaultLineStyle};
+var _terezka$elm_plot$Plot_Attributes$defaultHintConfig = {view: _elm_lang$core$Maybe$Nothing, lineStyle: _terezka$elm_plot$Plot_Attributes$defaultLine};
 var _terezka$elm_plot$Plot_Attributes$lineStyle = F2(
 	function (attrs, config) {
 		return _elm_lang$core$Native_Utils.update(
@@ -9379,7 +9379,7 @@ var _terezka$elm_plot$Plot_Attributes$lineStyle = F2(
 						function (x, y) {
 							return x(y);
 						}),
-					_terezka$elm_plot$Plot_Attributes$defaultLineStyle,
+					_terezka$elm_plot$Plot_Attributes$defaultLine,
 					attrs)
 			});
 	});
@@ -9429,7 +9429,7 @@ var _terezka$elm_plot$Plot_Attributes$maxBarWidth = F2(
 var _terezka$elm_plot$Plot_Attributes$ValuesAuto = {ctor: 'ValuesAuto'};
 var _terezka$elm_plot$Plot_Attributes$defaultGridConfig = {
 	values: _terezka$elm_plot$Plot_Attributes$ValuesAuto,
-	lineStyle: _terezka$elm_plot$Plot_Attributes$defaultLineStyle,
+	lineStyle: _terezka$elm_plot$Plot_Attributes$defaultLine,
 	classes: {ctor: '[]'},
 	orientation: _terezka$elm_plot$Plot_Attributes$X,
 	customAttrs: {ctor: '[]'}
@@ -9451,7 +9451,7 @@ var _terezka$elm_plot$Plot_Attributes$defaultAxisConfig = {
 			}),
 		values: _terezka$elm_plot$Plot_Attributes$ValuesAuto
 	},
-	lineStyle: _terezka$elm_plot$Plot_Attributes$defaultLineStyle,
+	lineStyle: _terezka$elm_plot$Plot_Attributes$defaultLine,
 	orientation: _terezka$elm_plot$Plot_Attributes$X,
 	clearIntersections: false,
 	anchor: _terezka$elm_plot$Plot_Attributes$AnchorOuter,
@@ -12170,7 +12170,7 @@ var _terezka$elm_plot$Plot$area = F2(
 					function (x, y) {
 						return x(y);
 					}),
-				_terezka$elm_plot$Plot_Attributes$defaultAreaStyle,
+				_terezka$elm_plot$Plot_Attributes$defaultArea,
 				attrs),
 			points);
 	});
@@ -12188,7 +12188,7 @@ var _terezka$elm_plot$Plot$line = F2(
 					function (x, y) {
 						return x(y);
 					}),
-				_terezka$elm_plot$Plot_Attributes$defaultLineStyle,
+				_terezka$elm_plot$Plot_Attributes$defaultLine,
 				attrs),
 			points);
 	});

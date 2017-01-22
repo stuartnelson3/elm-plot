@@ -23,17 +23,17 @@ module Plot.Attributes
         , PositionOption(..)
         , position
         , clearIntersections
-        , defaultLineStyle
+        , defaultLine
         , Tick
         , TickStyle
         , defaultTickStyle
         , defaultTickConfig
-        , LineStyle
+        , Line
         , Label
         , LabelStyle
         , defaultLabelStyle
-        , AreaStyle
-        , defaultAreaStyle
+        , Area
+        , defaultArea
         , Grid
         , defaultGridConfig
         , Group
@@ -62,6 +62,18 @@ module Plot.Attributes
         , Value
         , Style
         , Orientation(..)
+        , Plot
+        , defaultConfig
+        , margin
+        , paddingY
+        , id
+        , width2
+        , height
+        , style
+        , domainLowest
+        , domainHighest
+        , rangeLowest
+        , rangeHighest
         )
 
 {-| Attributes to alter styling.
@@ -70,6 +82,7 @@ module Plot.Attributes
 import Svg
 import Html
 import Internal.View as View
+import Internal.Types as Types exposing (..)
 
 
 {-| -}
@@ -98,6 +111,154 @@ type alias Style =
 type Orientation
     = X
     | Y
+
+
+type alias Plot =
+    { id : String
+    , classes : List String
+    , style : Style
+    , getHintInfo : Value -> HintInfo
+    , scales : Oriented Scale
+    }
+
+
+defaultConfig : Plot
+defaultConfig =
+    { id = "elm-plot"
+    , classes = []
+    , style = []
+    , getHintInfo = always { xValue = 0, yValues = [], isLeftSide = True }
+    , scales = Oriented (defaultScale 800) (defaultScale 500)
+    }
+
+
+defaultScale : Float -> Scale
+defaultScale length =
+    { bounds = { lower = 0, upper = 1 }
+    , offset = { lower = 0, upper = 0 }
+    , padding = { lower = 0, upper = 0 }
+    , ticks = []
+    , length = length
+    , values = []
+    }
+
+
+{-| Adds padding to your plot, meaning extra space below
+ and above the lowest and highest point in your plot.
+ The unit is pixels and the format is `( bottom, top )`.
+
+ Default: `( 0, 0 )`
+-}
+paddingY : ( Int, Int ) -> Attribute Plot
+paddingY padding config =
+    { config | scales = Oriented config.scales.x (updatePadding padding config.scales.y) }
+
+
+{-| Specify the size of your plot in pixels
+-}
+width : Int -> Attribute Plot
+width width config =
+    { config | scales = Oriented (updateLength width config.scales.x) config.scales.y }
+
+
+{-| Specify the size of your plot in pixels
+-}
+height : Int -> Attribute Plot
+height height config =
+    { config | scales = Oriented config.scales.x (updateLength height config.scales.y) }
+
+
+{-| Specify margin around the plot. Useful when your ticks are outside the
+ plot and you would like to add space to see them! Values are in pixels and
+the format is `( top, right, bottom, left )`.
+
+ Default: `( 0, 0, 0, 0 )`
+-}
+margin : ( Int, Int, Int, Int ) -> Attribute Plot
+margin ( t, r, b, l ) config =
+    { config | scales = Oriented (updateOffset l r config.scales.x) (updateOffset b t config.scales.y) }
+
+
+{-| Adds styles to the svg element.
+-}
+style : Style -> Attribute { a | style : Style }
+style style config =
+    { config | style = defaultConfig.style ++ style ++ [ ( "padding", "0" ) ] }
+
+
+{-| Adds an id to the svg element.
+-}
+id : String -> Attribute Plot
+id id config =
+    { config | id = id }
+
+
+updatePadding : ( Int, Int ) -> Scale -> Scale
+updatePadding ( bottom, top ) scale =
+    { scale | padding = Edges (toFloat bottom) (toFloat top) }
+
+
+updateLength : Int -> Scale -> Scale
+updateLength length scale =
+    { scale | length = toFloat length }
+
+
+updateOffset : Int -> Int -> Scale -> Scale
+updateOffset lower upper scale =
+    { scale | offset = Edges (toFloat lower) (toFloat upper) }
+
+
+applyBounds : (Float -> Float) -> (Float -> Float) -> Scale -> Scale
+applyBounds toLower toUpper scale =
+    { scale | offset = Edges (toLower scale.bounds.lower) (toUpper scale.bounds.lower) }
+
+
+{-| Alter the domain's lower boundary. The function provided will
+ be passed the lowest y-value present in any of your series and the result will
+ be the lower boundary of your series. So if you would like
+ the lowest boundary to simply be the edge of your series, then set
+ this attribute to the function `identity`.
+ If you want it to always be -5, then set this attribute to the function `always -5`.
+
+ The default is `identity`.
+
+ **Note:** If you are using `padding` as well, the extra padding will still be
+ added outside the domain.
+-}
+domainLowest : (Float -> Float) -> Attribute Plot
+domainLowest toLowest config =
+    { config | scales = Oriented config.scales.x (applyBounds toLowest identity config.scales.y) }
+
+
+{-| Alter the domain's upper boundary. The function provided will
+ be passed the lowest y-value present in any of your series and the result will
+ be the upper boundary of your series. So if you would like
+ the lowest boundary to  always be 10, then set this attribute to the function `always 10`.
+
+ The default is `identity`.
+
+ **Note:** If you are using `padding` as well, the extra padding will still be
+ added outside the domain.
+-}
+domainHighest : (Float -> Float) -> Attribute Plot
+domainHighest toHighest config =
+    { config | scales = Oriented config.scales.x (applyBounds identity toHighest config.scales.y) }
+
+
+{-| Provide a function to determine the lower boundary of range.
+ See `domainLowest` and imagine we're talking about the x-axis.
+-}
+rangeLowest : (Float -> Float) -> Attribute Plot
+rangeLowest toLowest config =
+    { config | scales = Oriented (applyBounds toLowest identity config.scales.y) config.scales.y }
+
+
+{-| Provide a function to determine the upper boundary of range.
+ See `domainHighest` and imagine we're talking about the x-axis.
+-}
+rangeHighest : (Float -> Float) -> Attribute Plot
+rangeHighest toHighest config =
+    { config | scales = Oriented (applyBounds identity toHighest config.scales.x) config.scales.y }
 
 
 {-| Set the stroke color.
@@ -177,8 +338,8 @@ length length config =
 
 {-| Adds classes.
 -}
-width : Int -> Attribute { c | width : Int }
-width width config =
+width2 : Int -> Attribute { c | width : Int }
+width2 width config =
     { config | width = width }
 
 
@@ -211,14 +372,14 @@ type alias HintInfo =
 
 type alias Hint msg =
     { view : Maybe (HintInfo -> Html.Html msg)
-    , lineStyle : LineStyle msg
+    , lineStyle : Line msg
     }
 
 
 defaultHintConfig : Hint msg
 defaultHintConfig =
     { view = Nothing
-    , lineStyle = defaultLineStyle
+    , lineStyle = defaultLine
     }
 
 
@@ -251,7 +412,7 @@ type alias AxisLabelInfo =
 type alias Axis msg =
     { tick : Tick AxisLabelInfo msg
     , label : Label { values : ValuesOption } AxisLabelInfo msg
-    , lineStyle : LineStyle msg
+    , lineStyle : Line msg
     , orientation : Orientation
     , anchor : AnchorOption
     , clearIntersections : Bool
@@ -268,7 +429,7 @@ defaultAxisConfig =
         , format = FormatFromFunc (.value >> toString)
         , values = ValuesAuto
         }
-    , lineStyle = defaultLineStyle
+    , lineStyle = defaultLine
     , orientation = X
     , clearIntersections = False
     , anchor = AnchorOuter
@@ -322,7 +483,7 @@ defaultBarsStyle =
     }
 
 
-type alias AreaStyle a =
+type alias Area a =
     { stroke : String
     , strokeWidth : Int
     , fill : String
@@ -332,8 +493,8 @@ type alias AreaStyle a =
     }
 
 
-defaultAreaStyle : AreaStyle a
-defaultAreaStyle =
+defaultArea : Area a
+defaultArea =
     { stroke = "black"
     , strokeWidth = 1
     , fill = "grey"
@@ -345,7 +506,7 @@ defaultAreaStyle =
 
 type alias Grid a =
     { values : ValuesOption
-    , lineStyle : LineStyle a
+    , lineStyle : Line a
     , classes : List String
     , orientation : Orientation
     , customAttrs : List (Svg.Attribute a)
@@ -355,14 +516,14 @@ type alias Grid a =
 defaultGridConfig : Grid a
 defaultGridConfig =
     { values = ValuesAuto
-    , lineStyle = defaultLineStyle
+    , lineStyle = defaultLine
     , classes = []
     , orientation = X
     , customAttrs = []
     }
 
 
-type alias LineStyle a =
+type alias Line a =
     { stroke : String
     , strokeWidth : Int
     , opacity : Float
@@ -371,8 +532,8 @@ type alias LineStyle a =
     }
 
 
-defaultLineStyle : LineStyle a
-defaultLineStyle =
+defaultLine : Line a
+defaultLine =
     { stroke = "black"
     , strokeWidth = 1
     , opacity = 1
@@ -383,9 +544,9 @@ defaultLineStyle =
 
 {-| Configures a line.
 -}
-lineStyle : List (Attribute (LineStyle msg)) -> Attribute { a | lineStyle : LineStyle msg }
+lineStyle : List (Attribute (Line msg)) -> Attribute { a | lineStyle : Line msg }
 lineStyle attrs config =
-    { config | lineStyle = List.foldr (<|) defaultLineStyle attrs }
+    { config | lineStyle = List.foldr (<|) defaultLine attrs }
 
 
 

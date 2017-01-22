@@ -1,13 +1,10 @@
 module Internal.Types
     exposing
         ( Scale
-        , Meta
         , Oriented
         , Edges
         , EdgesAny
         )
-
-import Plot.Attributes exposing (..)
 
 
 type alias Edges =
@@ -28,25 +25,11 @@ type alias Oriented a =
     }
 
 
-type alias Meta =
-    { scale : Oriented Scale
-    , ticks : List Float
-    , toSvgCoords : Point -> Point
-    , fromSvgCoords : Point -> Point
-    , oppositeTicks : List Float
-    , oppositeToSvgCoords : Point -> Point
-    , axisCrossings : List Float
-    , oppositeAxisCrossings : List Float
-    , getHintInfo : Float -> HintInfo
-    , toNearestX : Float -> Maybe Float
-    , id : String
-    }
-
-
 type alias Scale =
-    { range : Float
-    , lowest : Float
-    , highest : Float
-    , length : Float
+    { values : List Float
+    , ticks : List Float
+    , bounds : Edges
+    , padding : Edges
     , offset : Edges
+    , length : Float
     }

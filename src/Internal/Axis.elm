@@ -6,42 +6,48 @@ module Internal.Axis
         , getDelta
         )
 
-import Internal.Types exposing (Scale, Meta)
+import Internal.Types exposing (Scale)
 import Internal.Tick as Tick
 import Internal.Label as Label
 import Internal.Line as Line
 import Internal.Draw as Draw exposing (..)
-import Internal.Stuff exposing (..)
-import Plot.Attributes as Attributes exposing (Point, Value, Orientation(..), Axis, AxisLabelInfo, AnchorOption(..), PositionOption(..), ValuesOption(..))
+import Internal.Scale exposing (..)
+import Plot.Attributes as Attributes exposing (Plot, Point, Value, Orientation(..), Axis, AxisLabelInfo, AnchorOption(..), PositionOption(..), ValuesOption(..))
 import Svg
 import Svg.Attributes
 import Round
 import Regex
 
 
-view : Meta -> Axis msg -> Svg.Svg msg
-view ({ scale, toSvgCoords, oppositeAxisCrossings } as meta) ({ lineStyle, tick, label, orientation, clearIntersections, position, anchor, classes } as config) =
+view : Plot -> Axis msg -> Svg.Svg msg
+view plot ({ lineStyle, tick, label, orientation, clearIntersections, position, anchor, classes } as config) =
     let
         tickValues =
-            toTickValues meta config
+            toTickValues plot config
 
         labelValues =
             toLabelValues config tickValues
 
         axisPosition =
-            getAxisPosition scale.y position
+            getAxisPosition plot.scales.y position
     in
         Svg.g
             [ Draw.classAttributeOriented "axis" orientation classes ]
-            [ viewAxisLine lineStyle meta axisPosition
+            [ viewAxisLine lineStyle plot axisPosition
             , Svg.g
                 [ Svg.Attributes.class "elm-plot__axis__ticks" ]
-                (List.map (placeTick meta config axisPosition (Tick.toView tick)) (toIndexInfo orientation tickValues))
+                (List.map
+                    (placeTick plot config axisPosition (Tick.toView tick))
+                    (toIndexInfo orientation tickValues)
+                )
             , Svg.g
                 [ Svg.Attributes.class "elm-plot__axis__labels"
                 , Svg.Attributes.style <| toAnchorStyle anchor orientation
                 ]
-                (Label.view label (viewLabel meta config axisPosition) (toIndexInfo orientation labelValues))
+                (Label.view label
+                    (viewLabel plot config axisPosition)
+                    (toIndexInfo orientation labelValues)
+                )
             ]
 
 
@@ -49,27 +55,31 @@ view ({ scale, toSvgCoords, oppositeAxisCrossings } as meta) ({ lineStyle, tick,
 -- View line
 
 
-viewAxisLine : Attributes.LineStyle msg -> Meta -> Float -> Svg.Svg msg
-viewAxisLine config meta position =
-    Line.view meta config [ ( meta.scale.x.lowest, position ), ( meta.scale.x.highest, position ) ]
+viewAxisLine : Attributes.Line msg -> Plot -> Float -> Svg.Svg msg
+viewAxisLine config plot position =
+    Line.view plot
+        config
+        [ ( plot.scales.x.bounds.lower, position )
+        , ( plot.scales.x.bounds.upper, position )
+        ]
 
 
 
 -- View labels
 
 
-viewLabel : Meta -> Axis msg -> Float -> AxisLabelInfo -> Svg.Svg msg -> Svg.Svg msg
-viewLabel meta config axisPosition info view =
+viewLabel : Plot -> Axis msg -> Float -> AxisLabelInfo -> Svg.Svg msg -> Svg.Svg msg
+viewLabel plot config axisPosition info view =
     Svg.g
-        [ Svg.Attributes.transform (getLabelPosition meta config axisPosition info)
+        [ Svg.Attributes.transform (getLabelPosition plot config axisPosition info)
         , Svg.Attributes.class "elm-plot__axis__label"
         ]
         [ view ]
 
 
-getLabelPosition : Meta -> Axis msg -> Float -> AxisLabelInfo -> String
-getLabelPosition { toSvgCoords } { orientation, anchor } axisPosition info =
-    toSvgCoords ( info.value, axisPosition )
+getLabelPosition : Plot -> Axis msg -> Float -> AxisLabelInfo -> String
+getLabelPosition plot { orientation, anchor } axisPosition info =
+    toSvgCoords plot ( info.value, axisPosition )
         |> addDisplacement (getDisplacement anchor orientation)
         |> toTranslate
 
@@ -78,26 +88,26 @@ getLabelPosition { toSvgCoords } { orientation, anchor } axisPosition info =
 -- View ticks
 
 
-placeTick : Meta -> Axis msg -> Float -> (AxisLabelInfo -> Svg.Svg msg) -> AxisLabelInfo -> Svg.Svg msg
-placeTick { toSvgCoords } ({ orientation, anchor } as config) axisPosition view info =
+placeTick : Plot -> Axis msg -> Float -> (AxisLabelInfo -> Svg.Svg msg) -> AxisLabelInfo -> Svg.Svg msg
+placeTick plot ({ orientation, anchor } as config) axisPosition view info =
     Svg.g
-        [ Svg.Attributes.transform <| (toTranslate <| toSvgCoords ( info.value, axisPosition )) ++ " " ++ (toRotate anchor orientation)
+        [ Svg.Attributes.transform <| (toTranslate <| toSvgCoords plot ( info.value, axisPosition )) ++ " " ++ (toRotate anchor orientation)
         , Svg.Attributes.class "elm-plot__axis__tick"
         ]
         [ view info ]
 
 
 getAxisPosition : Scale -> PositionOption -> Float
-getAxisPosition { lowest, highest } position =
+getAxisPosition { bounds } position =
     case position of
         PositionAtZero ->
-            clamp lowest highest 0
+            clamp bounds.lower bounds.upper 0
 
         PositionLowest ->
-            lowest
+            bounds.lower
 
         PositionHighest ->
-            highest
+            bounds.upper
 
 
 toAnchorStyle : Attributes.AnchorOption -> Orientation -> String
@@ -162,17 +172,17 @@ toRotate anchor orientation =
                     "rotate(90 0 0)"
 
 
-filterValues : Meta -> Axis msg -> List Float -> List Float
-filterValues meta config values =
+filterValues : Plot -> Axis msg -> List Float -> List Float
+filterValues plot config values =
     if config.clearIntersections then
-        List.filter (isCrossing meta.oppositeAxisCrossings) values
+        List.filter (isCrossing plot) values
     else
         values
 
 
-isCrossing : List Float -> Float -> Bool
-isCrossing crossings value =
-    not <| List.member value crossings
+isCrossing : Plot -> Float -> Bool
+isCrossing plot value =
+    not <| List.member value plot.scales.y.ticks
 
 
 
@@ -180,10 +190,10 @@ isCrossing crossings value =
 -- just the scale we work with. It will also be the right one for the y-axis.
 
 
-toTickValues : Meta -> Axis msg -> List Value
-toTickValues meta config =
-    getValues config.tick.values meta.scale.x
-        |> filterValues meta config
+toTickValues : Plot -> Axis msg -> List Value
+toTickValues plot config =
+    getValues config.tick.values plot.scales.x
+        |> filterValues plot config
 
 
 toLabelValues : Axis msg -> List Value -> List Value
@@ -283,20 +293,20 @@ toValue delta firstValue index =
 
 
 toValuesFromDelta : Float -> Scale -> List Float
-toValuesFromDelta delta { lowest, range } =
+toValuesFromDelta delta scale =
     let
         firstValue =
-            getFirstValue delta lowest
+            getFirstValue delta scale.bounds.lower
 
         tickCount =
-            getCount delta lowest range firstValue
+            getCount delta scale.bounds.lower (getRange scale) firstValue
     in
         List.map (toValue delta firstValue) (List.range 0 tickCount)
 
 
 toValuesFromCount : Int -> Scale -> List Float
 toValuesFromCount appxCount scale =
-    toValuesFromDelta (getDelta scale.range appxCount) scale
+    toValuesFromDelta (getDelta (getRange scale) appxCount) scale
 
 
 toValuesAuto : Scale -> List Float

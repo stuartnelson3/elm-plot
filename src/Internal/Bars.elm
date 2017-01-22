@@ -8,27 +8,26 @@ module Internal.Bars
 import Svg
 import Svg.Attributes
 import Plot.Attributes as Attributes exposing (..)
-import Plot.Attributes as Attributes exposing (Orientation(..), MaxWidth(..))
-import Internal.Types exposing (Meta, Edges, Oriented, Scale)
+import Plot.Attributes as Attributes exposing (Point, Orientation(..), MaxWidth(..))
 import Internal.Draw exposing (..)
-import Internal.Stuff exposing (..)
+import Internal.Scale exposing (..)
 import Internal.Label as Label
 
 
 -- VIEW
 
 
-view : Meta -> Bars msg -> List (BarsStyle msg) -> List Group -> Svg.Svg msg
-view meta config styleConfigs groups =
+view : Plot -> Bars msg -> List (BarsStyle msg) -> List Group -> Svg.Svg msg
+view plot config styleConfigs groups =
     let
         width =
-            toBarWidth config groups (toAutoWidth meta config styleConfigs groups)
+            toBarWidth config groups (toAutoWidth plot config styleConfigs groups)
     in
-        Svg.g [] (List.map (viewGroup meta config styleConfigs width) groups)
+        Svg.g [] (List.map (viewGroup plot config styleConfigs width) groups)
 
 
-viewGroup : Meta -> Bars msg -> List (BarsStyle msg) -> Float -> Group -> Svg.Svg msg
-viewGroup meta config styleConfigs width group =
+viewGroup : Plot -> Bars msg -> List (BarsStyle msg) -> Float -> Group -> Svg.Svg msg
+viewGroup plot config styleConfigs width group =
     let
         labelInfos =
             List.indexedMap
@@ -38,18 +37,18 @@ viewGroup meta config styleConfigs width group =
                 group.yValues
 
         toCoords =
-            toStackedCoords meta config styleConfigs width group
+            toStackedCoords plot config styleConfigs width group
     in
         Svg.g []
             [ Svg.g []
                 (List.map2
                     (\styleConfig info ->
-                        viewBar meta width (toCoords info) config styleConfig info
+                        viewBar plot width (toCoords info) config styleConfig info
                     )
                     styleConfigs
                     labelInfos
                 )
-            , Svg.g [ Svg.Attributes.clipPath ("url(#" ++ toClipPathId meta ++ ")") ]
+            , Svg.g [ Svg.Attributes.clipPath ("url(#" ++ toClipPathId plot ++ ")") ]
                 (Label.view
                     config.label
                     (\info -> placeLabel width (toCoords info))
@@ -58,22 +57,22 @@ viewGroup meta config styleConfigs width group =
             ]
 
 
-toLength : Meta -> Bars msg -> BarLabelInfo -> Value
-toLength meta config bar =
+toLength : Plot -> Bars msg -> BarLabelInfo -> Value
+toLength plot config bar =
     case config.stackBy of
         X ->
-            toLengthTouchingXAxis meta config bar
+            toLengthTouchingXAxis plot config bar
 
         Y ->
             if bar.index == 0 then
-                toLengthTouchingXAxis meta config bar
+                toLengthTouchingXAxis plot config bar
             else
-                bar.yValue * meta.scale.y.length / meta.scale.y.range
+                bar.yValue * plot.scales.y.length / (getRange plot.scales.y)
 
 
-toLengthTouchingXAxis : Meta -> Bars msg -> BarLabelInfo -> Value
-toLengthTouchingXAxis { scale } config { yValue, index } =
-    (yValue - (clamp scale.y.lowest scale.y.highest 0)) * scale.y.length / scale.y.range
+toLengthTouchingXAxis : Plot -> Bars msg -> BarLabelInfo -> Value
+toLengthTouchingXAxis { scales } config { yValue, index } =
+    (yValue - (clamp scales.y.bounds.lower scales.y.bounds.upper 0)) * scales.y.length / (getRange scales.y)
 
 
 toXStackedOffset : List (BarsStyle msg) -> Float -> BarLabelInfo -> Value
@@ -95,21 +94,21 @@ toYStackedOffset { yValues } { index, yValue } =
         |> List.sum
 
 
-toStackedCoords : Meta -> Bars msg -> List (BarsStyle msg) -> Float -> Group -> BarLabelInfo -> Point
-toStackedCoords meta config styleConfigs width group bar =
+toStackedCoords : Plot -> Bars msg -> List (BarsStyle msg) -> Float -> Group -> BarLabelInfo -> Point
+toStackedCoords plot config styleConfigs width group bar =
     case config.stackBy of
         X ->
-            ( bar.xValue, max (min 0 meta.scale.y.highest) bar.yValue )
-                |> meta.toSvgCoords
+            ( bar.xValue, max (min 0 plot.scales.y.bounds.upper) bar.yValue )
+                |> toSvgCoords plot
                 |> addDisplacement ( toXStackedOffset styleConfigs width bar, 0 )
 
         Y ->
             ( bar.xValue, bar.yValue )
                 |> addDisplacement ( 0, toYStackedOffset group bar )
-                |> meta.toSvgCoords
+                |> toSvgCoords plot
                 |> addDisplacement
                     ( -width / 2
-                    , min 0 (toLength meta config bar)
+                    , min 0 (toLength plot config bar)
                     )
 
 
@@ -122,13 +121,13 @@ placeLabel width ( xSvg, ySvg ) label =
         [ label ]
 
 
-viewBar : Meta -> Float -> Point -> Bars msg -> BarsStyle msg -> BarLabelInfo -> Svg.Svg msg
-viewBar meta width ( xSvg, ySvg ) config styleConfig info =
+viewBar : Plot -> Float -> Point -> Bars msg -> BarsStyle msg -> BarLabelInfo -> Svg.Svg msg
+viewBar plot width ( xSvg, ySvg ) config styleConfig info =
     Svg.rect
         ([ Svg.Attributes.x (toString xSvg)
          , Svg.Attributes.y (toString ySvg)
          , Svg.Attributes.width (toString width)
-         , Svg.Attributes.height (toString (abs (toLength meta config info)))
+         , Svg.Attributes.height (toString (abs (toLength plot config info)))
          , Svg.Attributes.fill styleConfig.fill
          , Svg.Attributes.stroke "transparent"
          ]
@@ -141,8 +140,8 @@ viewBar meta width ( xSvg, ySvg ) config styleConfig info =
 -- Calculate width
 
 
-toAutoWidth : Meta -> Bars msg -> List (BarsStyle msg) -> List Group -> Float
-toAutoWidth { scale, toSvgCoords } { maxWidth, stackBy } styleConfigs groups =
+toAutoWidth : Plot -> Bars msg -> List (BarsStyle msg) -> List Group -> Float
+toAutoWidth { scales } { maxWidth, stackBy } styleConfigs groups =
     let
         width =
             case stackBy of
@@ -152,7 +151,7 @@ toAutoWidth { scale, toSvgCoords } { maxWidth, stackBy } styleConfigs groups =
                 Y ->
                     1
     in
-        width * scale.x.length / scale.x.range
+        width * scales.x.length / (getRange scales.x)
 
 
 toBarWidth : Bars msg -> List Group -> Float -> Float
@@ -169,7 +168,7 @@ toBarWidth { maxWidth } groups default =
 
 
 
--- For meta calculations
+-- For plot calculations
 
 
 toPoints : Bars msg -> List Group -> List Point
@@ -180,7 +179,7 @@ toPoints config groups =
 foldPoints : Bars msg -> Group -> List Point -> List Point
 foldPoints { stackBy } { xValue, yValues } points =
     if stackBy == X then
-        points ++ [ ( xValue, getLowest yValues ), ( xValue, getHighest yValues ) ]
+        points ++ List.map (\yValue -> ( xValue, yValue )) yValues
     else
         let
             ( positive, negative ) =
