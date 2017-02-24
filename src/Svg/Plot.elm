@@ -19,6 +19,8 @@ module Svg.Plot
         , DotsConfig
         , toDotsConfig
         , dotsSerie
+        , toPieConfig
+        , pieSerie
         , BarsConfig
         , BarValueInfo
         , toBarsConfig
@@ -72,6 +74,9 @@ module Svg.Plot
 
 ## Bars
 @docs BarsConfig, toBarsConfig, BarValueInfo, MaxBarWidth, barsSerie
+
+## Pies
+@docs toPieConfig, pieSerie
 
 ## Data transformation
 @docs Group, GroupTransformer, toGroups
@@ -148,6 +153,7 @@ type Serie msg
     | DotsSerie (DotsConfig msg) (List Point)
     | AreaSerie (AreaConfig msg) (List Point)
     | BarsSerie (BarsConfig msg) (List Group)
+    | PieSerie (PieConfig msg) (List Value)
 
 
 
@@ -449,6 +455,42 @@ toAreaConfig config =
 areaSerie : AreaConfig msg -> List Point -> Element msg
 areaSerie config data =
     SerieElement (findReachFromAreaPoints data) (AreaSerie config data)
+
+
+
+-- PIE CONFIG
+
+
+type PieConfig msg
+    = PieConfig
+        { styles : List (List (Svg.Attribute msg))
+        , beginAt : Value
+        , radius : Value
+        , attributes : List (Svg.Attribute msg)
+        }
+
+
+{-| -}
+toPieConfig :
+    { styles : List (List (Svg.Attribute msg))
+    , beginAt : Value
+    , radius : Value
+    , attributes : List (Svg.Attribute msg)
+    }
+    -> PieConfig msg
+toPieConfig config =
+    PieConfig config
+
+
+{-| -}
+pieSerie : PieConfig msg -> List Value -> Element msg
+pieSerie config data =
+    SerieElement (findReachFromPie config) (PieSerie config data)
+
+
+findReachFromPie : PieConfig msg -> Axised Reach
+findReachFromPie (PieConfig { radius }) =
+    Axised (Reach -radius radius) (Reach -radius radius)
 
 
 
@@ -956,10 +998,41 @@ viewSerie reach serie meta =
         BarsSerie config data ->
             viewBars config data meta
 
+        PieSerie config data ->
+            viewPie config data meta
+
 
 viewAtPosition : Point -> List (Svg msg) -> Meta -> Svg msg
 viewAtPosition point children meta =
     g [ transform (toTranslate (toSVGPoint meta point)) ] children
+
+
+-- VIEW PIE
+
+
+viewPie : PieConfig msg -> List Value -> Meta -> Svg msg
+viewPie (PieConfig { radius, styles }) values meta =
+    let
+      arc index value =
+        (value / (List.sum values), List.sum (List.take index values))
+
+      arcs =
+        List.indexedMap arc values
+
+      largeArcFlag fraction =
+        if fraction <= 0.5 then "0" else "1"
+
+      sweepFlag positionBegin =
+          if positionBegin <= 0.5 then "0" else "1"
+
+      instructions (fraction, positionBegin) =
+        "M " ++ toString (radius + 100 * cos (degrees (360 * fraction))) ++ " " ++ toString (radius - 100 * sin (degrees (360 * fraction)))
+        ++ " A " ++ toString radius ++ " " ++ toString radius ++ " 0 " ++ largeArcFlag fraction ++ " " ++ sweepFlag positionBegin ++ " " ++ toString radius ++ " 0"
+
+      view fraction attributes =
+        path (d (instructions fraction) :: attributes) []
+    in
+      viewAtPosition ( 0, 0 ) (List.map2 view arcs styles) meta
 
 
 

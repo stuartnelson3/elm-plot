@@ -107,7 +107,7 @@ view =
                 (fromDelta 5 10)
             , labels
                 (toString >> label [ fill axisColor, style "text-anchor: start;", displace ( 10, 5 ) ])
-                (fromDelta 0 10)
+                (fromDelta 0 10 >> remove 0)
             ]
         , yAxis atHighest
             [ line [ stroke axisColor ]
@@ -126,7 +126,7 @@ view =
                         , displace ( -10, 5 )
                         ]
                 )
-                (fromDelta 0 10)
+                (fromDelta 0 10 >> remove 0)
             ]
         , placeAt
             (fromRangeAndDomain (\xl xh yl yh -> ( xl, yh / 2 )))

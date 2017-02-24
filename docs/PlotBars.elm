@@ -36,17 +36,16 @@ plotConfig =
             , right = 30
             , bottom = 90
             }
-        , proportions =
-            { x = 600, y = 400 }
-        , toDomainLowest = identity
-        , toDomainHighest = \h -> h + 5
-        , toRangeLowest = identity
-        , toRangeHighest = identity
+        , proportions = { x = 600, y = 400 }
+        , toDomainLowest = \l -> l - 50
+        , toDomainHighest = \h -> h + 50
+        , toRangeLowest = \l -> l - 50
+        , toRangeHighest = \h -> h + 50
         }
 
 
-xLabelConfig : String -> Svg.Svg msg
-xLabelConfig =
+xLabelView : String -> Svg.Svg msg
+xLabelView =
     label
         [ fill axisColor
         , style "text-anchor: middle;"
@@ -75,23 +74,20 @@ barsConfig =
 view : Svg.Svg a
 view =
     plot plotConfig
-        [ barsSerie
-            barsConfig
-            (toGroups
-                { yValues = .values
-                , xValue = Nothing
-                }
-                [ { values = [ 40, 30, 20 ] }
-                , { values = [ 20, 30, 40 ] }
-                , { values = [ 40, 20, 10 ] }
-                , { values = [ 40, 50, 20 ] }
-                ]
-            )
-        , xAxis atZero
-            [ line [ stroke axisColor ]
-            , ticks (tick [ stroke axisColor, length 10 ]) (fromDelta 0 1)
-            , labelsFromStrings xLabelConfig (fromDelta 0 1) [ "A", "B", "C", "D" ]
-            ]
+        [ pieSerie
+            (toPieConfig
+              { styles =
+                  [ [ stroke pinkStroke, fill "transparent", strokeWidth "10" ]
+                  , [ stroke blueStroke, fill "transparent", strokeWidth "10" ]
+                  , [ stroke skinStroke, fill "transparent", strokeWidth "10" ]
+                  ]
+              , beginAt = 0
+              , radius = 100
+              , attributes = [ ]
+              })
+            [ 10, 30, 40 ]
+        , xAxis atZero [ line [ stroke axisColor ], labels (toString >> label []) (fromDelta 0 50) ]
+        , yAxis atZero [ line [ stroke axisColor ], labels (toString >> label []) (fromDelta 0 50) ]
         ]
 
 
